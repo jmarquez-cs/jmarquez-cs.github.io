@@ -1,0 +1,333 @@
+.hero {
+  min-height: 100vh;
+  padding: 8rem 0 4rem;
+  background: var(--gradient-primary);
+  color: var(--rican-white);
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+@media (min-width: 768px) {
+  .hero-content {
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .hero-content {
+    gap: 6rem;
+  }
+}
+
+.hero-title {
+  font-size: clamp(var(--text-4xl), 6vw, var(--text-7xl));
+  font-weight: 800;
+  line-height: var(--leading-tight);
+  margin-bottom: 1.5rem;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-size: clamp(var(--text-lg), 2.5vw, var(--text-xl));
+  line-height: var(--leading-body);
+  margin-bottom: 2.5rem;
+  opacity: 0.95;
+  max-width: 60ch;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-visual {
+  position: relative;
+  height: 200px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .hero-visual {
+    height: 400px;
+    max-width: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .hero-visual {
+    height: 500px;
+  }
+}
+
+.floating-card {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 24px;
+  animation: float 3s ease-in-out infinite;
+  box-shadow: 0 8px 20px var(--shadow-medium);
+}
+
+.card-mint {
+  background: var(--mint-600);
+  top: 20%;
+  right: 10%;
+  animation-delay: 0s;
+}
+
+.card-grape {
+  background: var(--grape-600);
+  top: 60%;
+  right: 40%;
+  animation-delay: 1s;
+}
+
+.card-lime {
+  background: var(--lime);
+  top: 40%;
+  right: 70%;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-25px) rotate(8deg);
+  }
+}
+
+/* Interactive Card Styles */
+.interactive-card {
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.interactive-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.15s ease,
+    height 0.15s ease,
+    opacity 0.15s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.interactive-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.interactive-card:active::before {
+  width: 300px;
+  height: 300px;
+  opacity: 1;
+}
+
+.interactive-card:active {
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* Individual card hover effects */
+.card-mint.interactive-card:hover::after {
+  content: '💎';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  opacity: 0.9;
+  animation: cardBounce 0.3s ease-out;
+}
+
+.card-grape.interactive-card:hover::after {
+  content: '🍇';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  opacity: 0.9;
+  animation: cardBounce 0.3s ease-out;
+}
+
+.card-lime.interactive-card:hover::after {
+  content: '⚡';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  opacity: 0.9;
+  animation: cardBounce 0.3s ease-out;
+}
+
+@keyframes cardBounce {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.4);
+  }
+}
+
+/* Physics animation keyframes */
+@keyframes cardPhysics {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
+  }
+  100% {
+    transform: var(--physics-transform);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
+
+  .hero-visual {
+    height: 200px;
+  }
+
+  .floating-card {
+    width: 80px;
+    height: 80px;
+  }
+
+  .easter-egg-card:hover::after {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 3rem 0.75rem 1.5rem;
+    min-height: 80vh;
+  }
+
+  .hero-content {
+    gap: 1.5rem;
+  }
+
+  .hero-visual {
+    height: 120px;
+  }
+
+  .floating-card {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+  }
+
+  .hero-title {
+    font-size: clamp(var(--text-3xl), 7vw, var(--text-5xl));
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-subtitle {
+    font-size: var(--text-lg);
+    margin-bottom: 1rem;
+  }
+
+  .hero-description {
+    font-size: var(--text-base);
+    margin-bottom: 1.5rem;
+    max-width: 50ch;
+  }
+
+  .hero-cta {
+    gap: 0.75rem;
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 280px;
+    padding: 0.875rem 1.25rem;
+    font-size: var(--text-sm);
+  }
+}
+
+/* Ultra-small screens (iPhone SE, small Android) */
+@media (max-width: 375px) {
+  .hero {
+    padding: 2.5rem 0.5rem 1rem;
+    min-height: 75vh;
+  }
+
+  .hero-content {
+    gap: 1rem;
+  }
+
+  .hero-visual {
+    height: 100px;
+  }
+
+  .floating-card {
+    width: 45px;
+    height: 45px;
+    border-radius: 8px;
+  }
+
+  .hero-title {
+    font-size: clamp(var(--text-2xl), 6vw, var(--text-4xl));
+    margin-bottom: 0.5rem;
+    line-height: 1.1;
+  }
+
+  .hero-subtitle {
+    font-size: var(--text-base);
+    margin-bottom: 0.75rem;
+  }
+
+  .hero-description {
+    font-size: var(--text-sm);
+    margin-bottom: 1.25rem;
+    max-width: 45ch;
+  }
+
+  .btn {
+    padding: 0.75rem 1rem;
+    font-size: var(--text-xs);
+  }
+
+  .card-mint.interactive-card:hover::after,
+  .card-grape.interactive-card:hover::after,
+  .card-lime.interactive-card:hover::after {
+    font-size: 1.25rem;
+  }
+}
