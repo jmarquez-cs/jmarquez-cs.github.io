@@ -586,7 +586,7 @@ export const Mermaid = () => {
   return (
     <section className="section">
       <div className="container">
-        <h2 className="section-title">Mermaid Diagram</h2>
+        <h2 className="section-title">Mermaid.js</h2>
         <div className="mermaid-container">
           <div className="mermaid-editor">
             <textarea
