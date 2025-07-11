@@ -1,19 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useContext } from 'react';
+import { ThemeContext } from '../contexts/ThemeContext';
 
 export const useTheme = () => {
-  const [theme, setTheme] = useState(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return savedTheme || 'light';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('theme', theme);
-    document.body.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
-
-  return { theme, toggleTheme };
+  return useContext(ThemeContext);
 };

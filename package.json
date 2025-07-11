@@ -30,6 +30,7 @@
   "dependencies": {
     "canvas-confetti": "^1.9.3",
     "kaplay": "^3001.0.19",
+    "mermaid": "^10.9.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   }

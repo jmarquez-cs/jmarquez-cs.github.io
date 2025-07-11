@@ -1,9 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types'; // Import PropTypes
-import { ThemeToggle } from '../ThemeToggle';
 import './Navigation.css';
+import { useTheme } from '../../hooks/useTheme';
 
-export const Navigation = ({ theme, onThemeToggle }) => {
+export const Navigation = () => {
+  const { theme, toggleTheme } = useTheme();
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -58,8 +58,4 @@ export const Navigation = ({ theme, onThemeToggle }) => {
   );
 };
 
-// Add propTypes validation
-Navigation.propTypes = {
-  theme: PropTypes.string.isRequired,
-  onThemeToggle: PropTypes.func.isRequired,
-};
+

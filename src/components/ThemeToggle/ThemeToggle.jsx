@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import PropTypes from 'prop-types'; // Import PropTypes
 import { useConfetti } from '../../hooks/useConfetti';
+import { useTheme } from '../../hooks/useTheme';
 import './ThemeToggle.css';
 
-export const ThemeToggle = ({ onToggle, currentTheme }) => {
+export const ThemeToggle = () => {
+  const { theme: currentTheme, toggleTheme: onToggle } = useTheme();
   const { triggerThemeConfetti } = useConfetti();
 
   // Auto-detect theme based on local time
@@ -53,8 +54,4 @@ export const ThemeToggle = ({ onToggle, currentTheme }) => {
   );
 };
 
-// Add propTypes validation
-ThemeToggle.propTypes = {
-  onToggle: PropTypes.func.isRequired,
-  currentTheme: PropTypes.string.isRequired,
-};
+

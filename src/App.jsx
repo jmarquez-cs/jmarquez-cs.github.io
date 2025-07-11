@@ -3,6 +3,7 @@ import { Navigation } from './components/Navigation';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
 import { Portfolio } from './components/Portfolio';
+import { Mermaid } from './components/Mermaid';
 import { Contact } from './components/Contact';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useTheme } from './hooks/useTheme';
@@ -22,14 +23,15 @@ function App() {
 
   return (
     <div className="App">
-      <Navigation theme={theme} onThemeToggle={handleThemeToggle} />
+      <Navigation />
       <main id="main-content">
         <Hero />
         <About />
         <Portfolio />
         <Contact />
+        <Mermaid />
       </main>
-      <ThemeToggle currentTheme={theme} onToggle={toggleTheme} />
+      <ThemeToggle />
       <Games /> {/* Render Games component (now modal) */}
       <footer className="footer">
         <div className="container">
