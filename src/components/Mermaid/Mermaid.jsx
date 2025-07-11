@@ -81,16 +81,6 @@ export const Mermaid = () => {
     todayLineColor: '#b91c1c', // --text-error
     taskTextColor: '#0c0f1d', // --rican-black
     taskTextOutsideColor: '#0c0f1d', // --rican-black
-    activeTaskBorderColor: '#0c0f1d', // --rican-black
-    activeTaskBkgColor: '#37c5b3', // --mint-800
-    gridColor: '#e5e5e5', // Light grey
-    doneTaskBkgColor: '#cbfaf4', // --mint-600
-    doneTaskBorderColor: '#97f0e5', // --rican-mint
-    critBorderColor: '#b91c1c', // --text-error
-    critBkgColor: '#f87171', // --text-error
-    todayLineColor: '#b91c1c', // --text-error
-    taskTextColor: '#0c0f1d', // --rican-black
-    taskTextOutsideColor: '#0c0f1d', // --rican-black
     taskTextLightColor: '#0c0f1d', // --rican-black
     taskTextDarkColor: '#0c0f1d', // --rican-black
     taskTextClickableColor: '#2563eb', // --focus-ring
@@ -103,20 +93,6 @@ export const Mermaid = () => {
     labelBackgroundColor: '#f7f7f7', // --rican-white
     compositeBackground: '#f7f7f7', // --rican-white
     altBackground: '#e9ccff', // --grape-500
-    compositeTitleBackground: '#f7f7f7', // --rican-white
-    compositeBorder: '#97f0e5', // --rican-mint
-    innerEndBackground: '#97f0e5', // --rican-mint
-    specialStateColor: '#0a0d1a', // --text-primary
-
-    // Class Diagram specific
-    classText: '#0a0d1a', // --text-primary
-    attributeBackgroundColorOdd: '#f7f7f7', // --rican-white
-    attributeBackgroundColorEven: '#eafcfa', // --mint-500
-
-    // User Journey specific
-    fillType0: '#eafcfa', // --mint-500
-    fillType1: '#f6ce9e', // --pears
-    fillType2: '#8cf28a', // --lime
     compositeTitleBackground: '#f7f7f7', // --rican-white
     compositeBorder: '#97f0e5', // --rican-mint
     innerEndBackground: '#97f0e5', // --rican-mint
@@ -309,16 +285,6 @@ export const Mermaid = () => {
     todayLineColor: '#f87171', // --text-error
     taskTextColor: '#fafafa', // --text-primary
     taskTextOutsideColor: '#fafafa', // --text-primary
-    activeTaskBorderColor: '#fafafa', // --text-primary
-    activeTaskBkgColor: '#97f0e5', // --text-accent
-    gridColor: '#4a4a4a', // Dark grey
-    doneTaskBkgColor: '#252842', // --bg-alt
-    doneTaskBorderColor: '#37c5b3', // --mint-800
-    critBorderColor: '#f87171', // --text-error
-    critBkgColor: '#b91c1c', // --text-error
-    todayLineColor: '#f87171', // --text-error
-    taskTextColor: '#fafafa', // --text-primary
-    taskTextOutsideColor: '#fafafa', // --text-primary
     taskTextLightColor: '#fafafa', // --text-primary
     taskTextDarkColor: '#fafafa', // --text-primary
     taskTextClickableColor: '#60a5fa', // --focus-ring
@@ -331,20 +297,6 @@ export const Mermaid = () => {
     labelBackgroundColor: '#0c0f1d', // --rican-black
     compositeBackground: '#0c0f1d', // --rican-black
     altBackground: '#252842', // --bg-alt
-    compositeTitleBackground: '#0c0f1d', // --rican-black
-    compositeBorder: '#37c5b3', // --mint-800
-    innerEndBackground: '#37c5b3', // --mint-800
-    specialStateColor: '#fafafa', // --text-primary
-
-    // Class Diagram specific
-    classText: '#fafafa', // --text-primary
-    attributeBackgroundColorOdd: '#0c0f1d', // --rican-black
-    attributeBackgroundColorEven: '#1a1d2e', // --bg-secondary
-
-    // User Journey specific
-    fillType0: '#1a1d2e', // --bg-secondary
-    fillType1: '#613dff', // --blueberry
-    fillType2: '#f946ac', // --guava
     compositeTitleBackground: '#0c0f1d', // --rican-black
     compositeBorder: '#37c5b3', // --mint-800
     innerEndBackground: '#37c5b3', // --mint-800

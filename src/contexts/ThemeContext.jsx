@@ -1,8 +1,12 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import PropTypes from 'prop-types';
 
 export const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
+  ThemeProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme || 'light';
@@ -17,11 +21,7 @@ export const ThemeProvider = ({ children }) => {
     setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = () => {
