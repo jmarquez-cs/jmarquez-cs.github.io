@@ -1,57 +1,46 @@
-import React, { useEffect } from 'react';
-import { useConfetti } from '../../hooks/useConfetti';
+import React, { useCallback, useEffect } from 'react';
 import { useTheme } from '../../hooks/useTheme';
-import './ThemeToggle.css';
+import { useConfetti } from '../../hooks/useConfetti';
+import FloatingButton from '../FloatingButton';
 
-export const ThemeToggle = () => {
-  const { theme: currentTheme, toggleTheme: onToggle } = useTheme();
-  const { triggerThemeConfetti } = useConfetti();
+const ThemeToggle = () => {
+  const { theme: currentTheme, toggleTheme, isPending: themeIsPending } = useTheme();
+  const { triggerConfetti, isPending: confettiIsPending } = useConfetti();
 
-  // Auto-detect theme based on local time
+  const handleClick = useCallback(() => {
+    toggleTheme();
+    triggerConfetti();
+  }, [toggleTheme, triggerConfetti]);
+
+  // Enhanced keyboard shortcuts
   useEffect(() => {
-    const autoDetectTheme = () => {
-      const hour = new Date().getHours();
-      const isDaytime = hour >= 6 && hour < 18; // 6 AM to 6 PM is day
-      const preferredTheme = isDaytime ? 'light' : 'dark';
-
-      // Only auto-switch if user hasn't manually set a preference recently
-      const lastManualToggle = localStorage.getItem('lastManualToggle');
-      const oneHourAgo = Date.now() - 60 * 60 * 1000;
-
-      if (!lastManualToggle || parseInt(lastManualToggle) < oneHourAgo) {
-        if (currentTheme !== preferredTheme) {
-          onToggle();
-        }
+    const handleKeyDown = (event) => {
+      // Ctrl/Cmd + Shift + T for theme toggle
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key === 'T') {
+        event.preventDefault();
+        handleClick();
       }
     };
 
-    // Check on mount
-    autoDetectTheme();
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleClick]);
 
-    // Check every hour
-    const interval = setInterval(autoDetectTheme, 60 * 60 * 1000);
-
-    return () => clearInterval(interval);
-  }, [currentTheme, onToggle]);
-
-  const handleClick = (e) => {
-    // Mark as manual toggle to prevent auto-switching for an hour
-    localStorage.setItem('lastManualToggle', Date.now().toString());
-
-    triggerThemeConfetti(e.currentTarget);
-    onToggle();
-  };
+  const icon = currentTheme === 'light' ? '🌙' : '☀️';
+  const ariaLabel = `Switch to ${currentTheme === 'light' ? 'dark' : 'light'} theme`;
+  const title = `${ariaLabel} (Ctrl+Shift+T)`;
 
   return (
-    <button
-      className="theme-toggle theme-toggle-floating"
+    <FloatingButton
+      position="center"
+      icon={icon}
+      isPending={themeIsPending || confettiIsPending}
       onClick={handleClick}
-      aria-label={`Switch to ${currentTheme === 'light' ? 'dark' : 'light'} theme`}
-      title={`Switch to ${currentTheme === 'light' ? 'dark' : 'light'} theme`}
-    >
-      {currentTheme === 'light' ? '🌙' : '☀️'}
-    </button>
+      ariaLabel={ariaLabel}
+      title={title}
+      zIndex={9999}
+    />
   );
 };
 
-
+export default React.memo(ThemeToggle);

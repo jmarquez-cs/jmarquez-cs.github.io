@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useConfetti } from '../../hooks/useConfetti';
 import './Contact.css';
 
-export const Contact = () => {
+const ContactComponent = () => {
   const { triggerConfetti } = useConfetti();
 
   const colorFlowCards = [
@@ -14,13 +14,70 @@ export const Contact = () => {
     { name: 'Mandarin', icon: '🍊', class: 'mandarin-flow' },
   ];
 
-  const handleCardClick = () => {
-    triggerConfetti();
-  };
+  const handleCardClick = useCallback(
+    async (event) => {
+      const card = event.currentTarget;
 
-  const handleContactClick = (platform) => {
-    triggerConfetti();
-  };
+      // Optimistic feedback - immediate pulse effect
+      card.style.transform = 'scale(1.05)';
+      card.style.transition = 'transform 0.15s ease';
+
+      try {
+        await triggerConfetti(card);
+
+        // Success feedback
+        card.style.transform = '';
+        card.style.backgroundColor = 'var(--success-color, #8cf28a)';
+
+        setTimeout(() => {
+          card.style.backgroundColor = '';
+        }, 400);
+      } catch (error) {
+        // Error feedback
+        console.error('Confetti trigger failed:', error);
+        card.style.transform = '';
+        card.style.backgroundColor = 'var(--error-color, #ff6b6b)';
+
+        setTimeout(() => {
+          card.style.backgroundColor = '';
+        }, 600);
+      }
+    },
+    [triggerConfetti],
+  );
+
+  const handleContactClick = useCallback(
+    async (contactMethod, event) => {
+      const contactCard = event.currentTarget;
+
+      // Optimistic feedback - immediate pulse effect
+      contactCard.style.transform = 'scale(1.02)';
+      contactCard.style.transition = 'transform 0.15s ease';
+
+      try {
+        await triggerConfetti(contactCard);
+        console.log(`Contact method clicked: ${contactMethod}`);
+
+        // Success feedback
+        contactCard.style.transform = '';
+        contactCard.style.backgroundColor = 'var(--success-color, #8cf28a)';
+
+        setTimeout(() => {
+          contactCard.style.backgroundColor = '';
+        }, 400);
+      } catch (error) {
+        // Error feedback
+        console.error('Contact interaction failed:', error);
+        contactCard.style.transform = '';
+        contactCard.style.backgroundColor = 'var(--error-color, #ff6b6b)';
+
+        setTimeout(() => {
+          contactCard.style.backgroundColor = '';
+        }, 600);
+      }
+    },
+    [triggerConfetti],
+  );
 
   return (
     <section id="contact" className="section">
@@ -36,7 +93,7 @@ export const Contact = () => {
               <a
                 href="https://www.linkedin.com/in/jmarquez-cs"
                 className="contact-link"
-                onClick={() => handleContactClick('linkedin')}
+                onClick={(e) => handleContactClick('linkedin', e)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Visit LinkedIn profile (opens in new tab)"
@@ -46,7 +103,7 @@ export const Contact = () => {
               <a
                 href="https://github.com/jmarquez-cs"
                 className="contact-link"
-                onClick={() => handleContactClick('github')}
+                onClick={(e) => handleContactClick('github', e)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Visit GitHub profile (opens in new tab)"
@@ -89,3 +146,6 @@ export const Contact = () => {
     </section>
   );
 };
+
+export const Contact = React.memo(ContactComponent);
+Contact.displayName = 'Contact';

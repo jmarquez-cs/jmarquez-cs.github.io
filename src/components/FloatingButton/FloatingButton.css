@@ -1,0 +1,361 @@
+/* Base Floating Button Styles - Shared by Theme, Bundle Analyzer, and Performance Dashboard */
+.floating-button-base {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 9998;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.floating-button-floating {
+  position: fixed;
+  right: 20px;
+  transform: translateY(-50%);
+  z-index: 9998;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Positioning variants */
+.floating-button-center {
+  top: 50%;
+  z-index: 9999;
+}
+
+.floating-button-above {
+  top: calc(50% - 72px);
+  z-index: 9998;
+}
+
+.floating-button-below {
+  top: calc(50% + 72px);
+  z-index: 9998;
+}
+
+/* Ensure floating buttons appear above dashboards when active */
+.floating-button-base.active,
+.floating-button-floating.active {
+  z-index: 10001 !important;
+  background: rgba(244, 67, 54, 0.9);
+  border-color: #f44336;
+}
+
+/* Ripple effect for all floating buttons */
+.floating-button-base::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: var(--text-accent);
+  opacity: 0.1;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.3s ease,
+    height 0.3s ease;
+}
+
+.floating-button-base:hover::before {
+  width: 100%;
+  height: 100%;
+}
+
+/* Shared hover effects */
+.floating-button-floating:hover {
+  transform: translateY(-50%) rotate(180deg) scale(1.1);
+  border-color: var(--text-accent);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-button-floating:hover::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--text-accent);
+  opacity: 0.1;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+}
+
+/* Focus states for accessibility */
+.floating-button-base:focus,
+.floating-button-floating:focus {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+  animation: floating-pulse 0.4s ease-in-out;
+}
+
+.floating-button-base:focus:not(:focus-visible),
+.floating-button-floating:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.floating-button-base:focus-visible,
+.floating-button-floating:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* Active states */
+.floating-button-floating:active {
+  transform: translateY(-50%) rotate(180deg) scale(0.95);
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Pending/loading states */
+.floating-button-floating.pending {
+  opacity: 0.8;
+  transform: translateY(-50%) scale(0.95);
+  transition: all 0.2s ease;
+  cursor: wait;
+}
+
+.floating-button-floating:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.floating-button-floating:disabled:hover {
+  transform: translateY(-50%);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Error state animation */
+@keyframes floating-error {
+  0%,
+  100% {
+    transform: translateY(-50%);
+  }
+  25% {
+    transform: translateY(-50%) translateX(-5px);
+  }
+  75% {
+    transform: translateY(-50%) translateX(5px);
+  }
+}
+
+.floating-button-floating.error {
+  animation: floating-error 0.3s ease-in-out;
+  background: rgba(255, 107, 107, 0.8);
+  border-color: #ff6b6b;
+}
+
+/* Pulse animation */
+@keyframes floating-pulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 12px 48px var(--text-accent);
+    transform: translateY(-50%) scale(1.05);
+  }
+}
+
+/* Dark theme specific styling */
+[data-theme='dark'] .floating-button-floating {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='dark'] .floating-button-floating:hover {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: var(--text-accent);
+}
+
+[data-theme='dark'] .floating-button-base.active,
+[data-theme='dark'] .floating-button-floating.active {
+  background: rgba(244, 67, 54, 0.9);
+  border-color: #f44336;
+}
+
+/* Responsive design - shared across all floating buttons */
+@media (max-width: 1024px) {
+  .floating-button-floating {
+    right: max(12px, calc(100vw - 100% + 12px));
+    z-index: 10001;
+  }
+
+  .floating-button-floating.active {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    transform: none;
+    z-index: 10001 !important;
+    background: rgba(244, 67, 54, 0.9);
+    border-color: #f44336;
+    box-shadow: 0 8px 32px var(--shadow-strong);
+  }
+
+  .floating-button-floating.active:hover {
+    background: rgba(244, 67, 54, 1);
+    transform: scale(1.1);
+  }
+}
+
+@media (max-width: 768px) {
+  .floating-button-floating {
+    width: 48px;
+    height: 48px;
+    font-size: var(--text-lg);
+    right: max(16px, calc(100vw - 100% + 16px));
+  }
+
+  .floating-button-floating.active {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    width: 44px;
+    height: 44px;
+    font-size: var(--text-base);
+    transform: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .floating-button-floating {
+    width: 44px;
+    height: 44px;
+    right: max(12px, calc(100vw - 100% + 12px));
+    font-size: var(--text-base);
+  }
+
+  .floating-button-floating.active {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: var(--text-sm);
+    transform: none;
+  }
+}
+
+@media (max-width: 375px) {
+  .floating-button-floating {
+    width: 40px;
+    height: 40px;
+    right: max(10px, calc(100vw - 100% + 10px));
+    font-size: var(--text-sm);
+  }
+
+  .floating-button-floating.active {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: var(--text-sm);
+    transform: none;
+  }
+}
+
+/* Container queries for better responsive behavior */
+@container (max-width: 768px) {
+  .floating-button-floating {
+    font-size: var(--text-lg);
+  }
+}
+
+@container (max-width: 480px) {
+  .floating-button-floating {
+    font-size: var(--text-base);
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .floating-button-floating {
+    transition: none;
+  }
+
+  .floating-button-floating:hover {
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  @keyframes floating-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+}
+
+@media (prefers-contrast: high) {
+  .floating-button-floating {
+    border: 3px solid var(--text-primary);
+    background: var(--bg-primary);
+  }
+}
+
+/* Hide in print */
+@media print {
+  .floating-button-floating {
+    display: none;
+  }
+}
+
+/* Smooth transitions for viewport changes */
+.floating-button-floating {
+  transition:
+    all 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.2s ease,
+    height 0.2s ease,
+    right 0.2s ease,
+    top 0.2s ease;
+}
+
+.floating-button-base.pending,
+.floating-button-floating.pending {
+  opacity: 0.7;
+  transform: translateY(-50%) scale(0.95);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.floating-button-base:disabled,
+.floating-button-floating:disabled {
+  cursor: not-allowed;
+}

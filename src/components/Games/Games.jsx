@@ -1,20 +1,42 @@
-import React from 'react';
+import React, { Suspense, lazy, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useGameVisibility } from '../../contexts/GameVisibilityContext';
-import FlappyBird from './FlappyBird'; // Import FlappyBird
-import './Games.css'; // This will now contain modal styling
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
+import './Games.css';
+
+// Lazy load FlappyBird component
+const FlappyBird = lazy(() => import('./FlappyBird'));
+
+// Loading component for Games
+const GamesLoading = () => (
+  <div className="game-loading">
+    <div className="game-loading-spinner"></div>
+    <p>Loading game...</p>
+  </div>
+);
 
 export const Games = () => {
-  // Keeping the name Games for colocation
-  const { showGame, setShowGame } = useGameVisibility();
+  usePerformanceMonitor('Games');
+
+  const {
+    showGame,
+    setShowGame,
+    currentGameState,
+    score,
+    highScore,
+    isLoading,
+    setGameState,
+    resetGame,
+  } = useGameVisibility();
+
+  const handleClose = useCallback(() => {
+    resetGame();
+    setShowGame(false);
+  }, [setShowGame, resetGame]);
 
   if (!showGame) {
-    return null; // Don't render anything if the game is not supposed to be shown
+    return null;
   }
-
-  const handleClose = () => {
-    setShowGame(false);
-  };
 
   return (
     <div className="game-modal-overlay">
@@ -22,12 +44,16 @@ export const Games = () => {
         <button className="game-modal-close" onClick={handleClose} aria-label="Close game">
           &times;
         </button>
-        <FlappyBird />
+        <Suspense fallback={<GamesLoading />}>
+          <FlappyBird />
+        </Suspense>
       </div>
     </div>
   );
 };
 
 Games.propTypes = {
-  children: PropTypes.node, // Keep children propType for consistency, though not directly used here
+  children: PropTypes.node,
 };
+
+Games.displayName = 'Games';

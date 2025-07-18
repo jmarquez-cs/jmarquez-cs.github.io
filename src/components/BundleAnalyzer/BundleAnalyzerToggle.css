@@ -1,0 +1,6 @@
+/* BundleAnalyzerToggle specific styles - all floating styles moved to FloatingButton.css */
+
+/* Only keep styles for non-floating bundle analyzer toggles if needed in the future */
+.bundle-analyzer-toggle-inline {
+  /* Reserved for potential inline bundle analyzer toggle variants */
+}

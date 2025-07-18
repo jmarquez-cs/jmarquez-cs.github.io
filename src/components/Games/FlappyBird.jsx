@@ -1,110 +1,167 @@
-import React, { useEffect, useRef, useState } from 'react';
-import kaplay from 'kaplay'; // Re-import kaplay
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import PropTypes from 'prop-types';
 
-const FlappyBird = () => {
+// Preload kaplay chunks when component becomes visible
+const preloadKaplayChunks = () => {
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      import('kaplay').catch(() => {});
+    });
+  }
+};
+
+// Enhanced lazy loading with intelligent chunking
+const loadKaplay = async () => {
+  try {
+    const kaplayModule = await import('kaplay');
+    return kaplayModule.default;
+  } catch (error) {
+    console.error('Failed to load Kaplay:', error);
+    throw error;
+  }
+};
+
+export const FlappyBird = ({ onClose }) => {
   const gameContainerRef = useRef(null);
-  const kaplayInstanceRef = useRef(null); // Re-introduce kaplayInstanceRef
-  const [isKaplayInitialized, setIsKaplayInitialized] = useState(false); // Track initialization
+  const kaplayInstanceRef = useRef(null);
+  const intersectionRef = useRef(null);
+  const [isKaplayInitialized, setIsKaplayInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [error, setError] = useState(null);
 
   console.log('FlappyBird: Component Render');
 
-  // useEffect for kaplay initialization, canvas appending, and resize logic
+  // Intersection Observer for intelligent preloading
   useEffect(() => {
-    console.log('FlappyBird: useEffect for kaplay setup running');
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+            preloadKaplayChunks();
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '100px' },
+    );
+
+    if (intersectionRef.current) {
+      observer.observe(intersectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Enhanced kaplay initialization with progress tracking
+  const initializeKaplay = useCallback(async () => {
     const container = gameContainerRef.current;
     console.log('FlappyBird: useEffect setup - container ref:', container);
 
-    // Only proceed if container is available and kaplay hasn't been initialized yet
     if (!container || isKaplayInitialized) {
       console.log('FlappyBird: Container not available or kaplay already initialized, returning.');
       return;
     }
 
-    let k;
+    try {
+      setIsLoading(true);
+      setError(null);
+      setLoadingProgress(10);
 
-    // Initialize Kaplay
-    console.log('FlappyBird: Initializing kaplay...');
-    k = kaplay({
-      canvas: document.createElement('canvas'), // Kaplay creates its own canvas
-    });
-    kaplayInstanceRef.current = k;
-    setIsKaplayInitialized(true); // Mark as initialized
-    console.log('FlappyBird: kaplay initialized, instance:', k);
+      console.log('FlappyBird: Loading kaplay...');
+      const kaplay = await loadKaplay();
+      setLoadingProgress(40);
 
-    // Append the kaplay canvas to the ref's current element
-    // Ensure it's only appended once
-    if (container.children.length === 0 || container.children[0] !== k.canvas) {
-      // Clear existing children if any, to prevent multiple canvases
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
-      container.appendChild(k.canvas);
-      console.log('FlappyBird: Appended kaplay canvas to container');
-    } else {
-      console.log('FlappyBird: Kaplay canvas already appended');
-    }
-
-    // Function to resize kaplay canvas
-    const resizeKaplay = () => {
-      // Ensure kaplay canvas has dimensions before accessing properties
-      if (!k.canvas || k.canvas.offsetWidth === 0 || k.canvas.offsetHeight === 0) {
-        console.log('FlappyBird: Kaplay canvas not ready for resize, skipping.', k.canvas);
-        return;
-      }
-      const { clientWidth, clientHeight } = container;
-      console.log(`FlappyBird: Resizing kaplay to ${clientWidth}x${clientHeight}`);
-      k.resize(clientWidth, clientHeight);
-      console.log('FlappyBird: Kaplay canvas dimensions after resize:', k.canvas.width, k.canvas.height);
-    };
-
-    // Initial resize after canvas is appended and container is available
-    // Use requestAnimationFrame for initial resize to ensure layout is ready
-    let animationFrameId;
-    const scheduleResize = () => {
-      animationFrameId = requestAnimationFrame(() => {
-        resizeKaplay();
+      console.log('FlappyBird: Initializing kaplay...');
+      const k = kaplay({
+        canvas: document.createElement('canvas'),
+        width: container.clientWidth || 800,
+        height: container.clientHeight || 600,
       });
-    };
-    scheduleResize();
+      setLoadingProgress(70);
 
-    // Observe container resize
-    const resizeObserver = new ResizeObserver(scheduleResize);
-    resizeObserver.observe(container);
+      kaplayInstanceRef.current = k;
+      setIsKaplayInitialized(true);
+      console.log('FlappyBird: kaplay initialized, instance:', k);
 
-    // Cleanup for kaplay setup useEffect
-    return () => {
-      console.log('FlappyBird: kaplay setup useEffect Cleanup function running');
-      resizeObserver.disconnect(); // Disconnect ResizeObserver
-      cancelAnimationFrame(animationFrameId); // Cancel any pending animation frame
-
-      // Destroy kaplay instance only if it was created by this component
-      if (kaplayInstanceRef.current && typeof kaplayInstanceRef.current.destroy === 'function') {
-        console.log('FlappyBird: Calling destroy() on kaplay instance');
-        kaplayInstanceRef.current.destroy();
-        kaplayInstanceRef.current = null; // Clear the ref
-        console.log('FlappyBird: kaplay instance destroyed and ref cleared');
+      // Append the kaplay canvas to the ref's current element
+      if (container.children.length === 0 || container.children[0] !== k.canvas) {
+        while (container.firstChild) {
+          container.removeChild(container.firstChild);
+        }
+        container.appendChild(k.canvas);
+        console.log('FlappyBird: Appended kaplay canvas to container');
       }
-    };
-  }, [gameContainerRef.current]); // Dependency on gameContainerRef.current
+      setLoadingProgress(90);
 
-  // useEffect for game logic that doesn't require immediate DOM measurements
+      // Function to resize kaplay canvas
+      const resizeKaplay = () => {
+        if (!k.canvas || k.canvas.offsetWidth === 0 || k.canvas.offsetHeight === 0) {
+          console.log('FlappyBird: Kaplay canvas not ready for resize, skipping.', k.canvas);
+          return;
+        }
+        const { clientWidth, clientHeight } = container;
+        console.log(`FlappyBird: Resizing kaplay to ${clientWidth}x${clientHeight}`);
+        k.resize(clientWidth, clientHeight);
+      };
+
+      // Initial resize and setup resize observer
+      let animationFrameId = requestAnimationFrame(resizeKaplay);
+      const resizeObserver = new ResizeObserver(() => {
+        animationFrameId = requestAnimationFrame(resizeKaplay);
+      });
+      resizeObserver.observe(container);
+
+      setLoadingProgress(100);
+      setIsLoading(false);
+
+      // Cleanup function
+      return () => {
+        console.log('FlappyBird: kaplay setup cleanup');
+        resizeObserver.disconnect();
+        cancelAnimationFrame(animationFrameId);
+
+        if (kaplayInstanceRef.current && typeof kaplayInstanceRef.current.destroy === 'function') {
+          console.log('FlappyBird: Calling destroy() on kaplay instance');
+          kaplayInstanceRef.current.destroy();
+          kaplayInstanceRef.current = null;
+        }
+      };
+    } catch (err) {
+      console.error('Failed to initialize kaplay:', err);
+      setError(err);
+      setIsLoading(false);
+      setLoadingProgress(0);
+    }
+  }, [isKaplayInitialized]);
+
+  useEffect(() => {
+    let cleanup;
+    initializeKaplay().then((cleanupFn) => {
+      cleanup = cleanupFn;
+    });
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [initializeKaplay]);
+
+  // Game logic setup
   useEffect(() => {
     console.log('FlappyBird: useEffect for game logic running');
-    const k = kaplayInstanceRef.current; // Get kaplay instance from ref
-    if (!k) {
+    const k = kaplayInstanceRef.current;
+    if (!k || !isKaplayInitialized) {
       console.error('FlappyBird: kaplay instance not available for game logic');
       return;
     }
 
-    // Game variables
-    const JUMP_FORCE = 320;
-    const PIPE_SPEED = 100;
-    const PIPE_OPEN = 120;
-    const BIRD_X = 80;
+    try {
+      // Game variables
+      const JUMP_FORCE = 320;
+      const PIPE_SPEED = 100;
+      const PIPE_OPEN = 120;
+      const BIRD_X = 80;
 
-    // Game scene (only set up once)
-    // Check if scenes are already defined to prevent re-definition on re-render
-    if (!k.getScene('game')) { // Assuming getScene exists or similar check
+      // Game scene setup
       k.scene('game', () => {
         console.log('FlappyBird: Setting up game scene');
         k.add([k.rect(k.width, k.height), k.color(0.5, 0.7, 1)]); // Background
@@ -194,19 +251,114 @@ const FlappyBird = () => {
 
         k.onClick(() => k.go('game'));
       });
+
+      k.go('game');
+    } catch (err) {
+      console.error('Error setting up game logic:', err);
+      setError(err);
     }
 
-    k.go('game'); // Always go to game scene on mount
-
-    // Cleanup function for game logic useEffect
     return () => {
-      console.log('FlappyBird: game logic useEffect Cleanup function running');
-      // Optionally, you might want to pause the game or reset the scene here
-      // if the FlappyBird component unmounts.
+      console.log('FlappyBird: game logic useEffect cleanup');
     };
-  }, [isKaplayInitialized]); // Dependency on isKaplayInitialized
+  }, [isKaplayInitialized]);
 
-  return <div ref={gameContainerRef} style={{ width: '100%', height: '100%' }}></div>;
+  if (error) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          padding: '20px',
+          color: 'var(--text-error)',
+        }}
+      >
+        <h3>Failed to load game</h3>
+        <p>{error.message}</p>
+        <button
+          onClick={() => {
+            setError(null);
+            setIsLoading(false);
+          }}
+          style={{
+            padding: '10px 20px',
+            marginTop: '10px',
+            background: 'var(--text-accent)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+          }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          gap: '20px',
+        }}
+      >
+        <div
+          style={{
+            width: '60px',
+            height: '60px',
+            border: '6px solid var(--bg-secondary)',
+            borderTop: '6px solid var(--text-accent)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+          }}
+        ></div>
+        <div
+          style={{
+            width: '200px',
+            height: '8px',
+            background: 'var(--bg-secondary)',
+            borderRadius: '4px',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              width: `${loadingProgress}%`,
+              height: '100%',
+              background: 'linear-gradient(90deg, var(--text-accent), var(--mint-800))',
+              borderRadius: '4px',
+              transition: 'width 0.3s ease',
+            }}
+          ></div>
+        </div>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+          Loading game... {loadingProgress}%
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      ref={(el) => {
+        gameContainerRef.current = el;
+        intersectionRef.current = el;
+      }}
+      style={{ width: '100%', height: '100%' }}
+    />
+  );
 };
 
-export default FlappyBird;
+FlappyBird.displayName = 'FlappyBird';
+FlappyBird.propTypes = {
+  onClose: PropTypes.func.isRequired,
+};

@@ -12,21 +12,49 @@
 }
 
 .game-modal-content {
-  background-color: #fff;
+  background: var(--bg-primary);
+  border-radius: 12px;
   padding: 20px;
-  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90%;
+  overflow: auto;
   position: relative;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.game-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  min-height: 200px;
+}
 
-  /* Re-added styles for larger modal */
-  width: 90vw; /* 90% of viewport width */
-  height: 90vh; /* 90% of viewport height */
-  max-width: 500px; /* Max width for larger screens (e.g., tablet/desktop) */
-  max-height: 800px; /* Max height for larger screens */
-  overflow: auto; /* Enable scrolling if content overflows */
+.game-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid var(--text-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.game-loading p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .game-modal-content canvas {

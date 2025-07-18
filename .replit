@@ -3,6 +3,7 @@ run = "npm install && npm run dev"
 
 [nix]
 channel = "stable-24_05"
+packages = ["psmisc"]
 
 [deployment]
 run = ["sh", "-c", "npm install && npm run dev"]
@@ -11,14 +12,27 @@ run = ["sh", "-c", "npm install && npm run dev"]
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
 [workflows]
-runButton = "Development"
+runButton = "Format, Lint, Build, Preview"
 
 [[workflows.workflow]]
-name = "Development"
+name = "Format, Lint, Build, Preview"
 author = 29611748
 mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
+args = "npm run format && npm run lint && npm run build && npm run dev"
+
+[[workflows.workflow]]
+name = "Preview"
+author = 29611748
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install && npm run preview"

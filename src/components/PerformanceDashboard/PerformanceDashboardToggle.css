@@ -1,0 +1,6 @@
+/* PerformanceDashboardToggle specific styles - all floating styles moved to FloatingButton.css */
+
+/* Only keep styles for non-floating performance dashboard toggles if needed in the future */
+.performance-dashboard-toggle-inline {
+  /* Reserved for potential inline performance dashboard toggle variants */
+}

@@ -1,15 +1,21 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import './Navigation.css';
 import { useTheme } from '../../hooks/useTheme';
 
-export const Navigation = () => {
+export const Navigation = React.memo(() => {
   const { theme, toggleTheme } = useTheme();
-  const scrollToSection = (sectionId) => {
+
+  const scrollToSection = useCallback((sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
+
+  const handleHomeClick = useCallback(() => scrollToSection('hero'), [scrollToSection]);
+  const handleAboutClick = useCallback(() => scrollToSection('about'), [scrollToSection]);
+  const handlePortfolioClick = useCallback(() => scrollToSection('portfolio'), [scrollToSection]);
+  const handleContactClick = useCallback(() => scrollToSection('contact'), [scrollToSection]);
 
   return (
     <nav className="navbar">
@@ -17,18 +23,14 @@ export const Navigation = () => {
         <div className="nav-brand">JOHN MARQUEZ</div>
         <ul className="nav-menu">
           <li>
-            <button
-              className="nav-link"
-              onClick={() => scrollToSection('hero')}
-              aria-label="Go to home section"
-            >
+            <button className="nav-link" onClick={handleHomeClick} aria-label="Go to home section">
               Home
             </button>
           </li>
           <li>
             <button
               className="nav-link"
-              onClick={() => scrollToSection('about')}
+              onClick={handleAboutClick}
               aria-label="Go to about section"
             >
               About
@@ -37,7 +39,7 @@ export const Navigation = () => {
           <li>
             <button
               className="nav-link"
-              onClick={() => scrollToSection('portfolio')}
+              onClick={handlePortfolioClick}
               aria-label="Go to portfolio section"
             >
               Portfolio
@@ -46,7 +48,7 @@ export const Navigation = () => {
           <li>
             <button
               className="nav-link"
-              onClick={() => scrollToSection('contact')}
+              onClick={handleContactClick}
               aria-label="Go to contact section"
             >
               Contact
@@ -56,6 +58,6 @@ export const Navigation = () => {
       </div>
     </nav>
   );
-};
+});
 
-
+Navigation.displayName = 'Navigation';

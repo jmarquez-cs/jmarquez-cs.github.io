@@ -1,419 +1,53 @@
-import React, { useState, useEffect, useRef } from 'react';
-import mermaid from 'mermaid';
-import './mermaid.css';
+import React, { useState, useEffect, useRef, Suspense, useCallback, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useTheme } from '../../hooks/useTheme';
+import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
+import './mermaid.css';
 
-export const Mermaid = () => {
+// Preload mermaid chunks when component becomes visible
+const preloadMermaidChunks = () => {
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    window.requestIdleCallback(() => {
+      // Preload core mermaid chunk
+      import('mermaid').catch(() => {});
+    });
+  }
+};
+
+// Enhanced lazy loading with intelligent chunking
+const loadMermaid = async () => {
+  try {
+    const mermaidModule = await import('mermaid');
+    return mermaidModule.default;
+  } catch (error) {
+    console.error('Failed to load Mermaid:', error);
+    throw error;
+  }
+};
+
+// Enhanced loading component with skeleton
+const MermaidLoading = () => (
+  <div className="mermaid-loading">
+    <div className="mermaid-loading-container">
+      <div className="mermaid-loading-spinner"></div>
+      <div className="mermaid-loading-skeleton">
+        <div className="skeleton-header"></div>
+        <div className="skeleton-diagram">
+          <div className="skeleton-node"></div>
+          <div className="skeleton-line"></div>
+          <div className="skeleton-node"></div>
+          <div className="skeleton-line"></div>
+          <div className="skeleton-node"></div>
+        </div>
+      </div>
+      <p>Loading diagram renderer...</p>
+    </div>
+  </div>
+);
+
+// Interactive Mermaid Editor Component
+const MermaidComponent = () => {
   const { theme } = useTheme();
-
-  const lightThemeConfig = {
-    // General
-    fontFamily: 'Inter Tight, sans-serif',
-    fontSize: '16px',
-    textColor: '#0a0d1a', // --text-primary
-    darkMode: false,
-    background: '#f7f7f7', // --rican-white
-
-    // Nodes
-    primaryColor: '#eafcfa', // --mint-500
-    primaryTextColor: '#0c0f1d', // --rican-black
-    primaryBorderColor: '#97f0e5', // --rican-mint
-    secondaryColor: '#f6ce9e', // --pears
-    secondaryTextColor: '#0c0f1d', // Derived from --rican-black
-    secondaryBorderColor: '#f97946', // Derived from --mandarin
-    tertiaryColor: '#8cf28a', // --lime
-    tertiaryTextColor: '#0c0f1d', // Derived from --rican-black
-    tertiaryBorderColor: '#6bcc69', // Derived from --lime
-
-    // Lines/Edges
-    lineColor: '#37c5b3', // --mint-800
-    arrowheadColor: '#37c5b3', // --mint-800
-    edgeColor: '#37c5b3', // --mint-800
-    defaultLinkColor: '#37c5b3', // --mint-800
-
-    // Clusters
-    clusterBkg: '#e9ccff', // --grape-500
-    clusterBorder: '#c584f6', // --grape-700
-
-    // Notes
-    noteBkgColor: '#f9d546', // --banana
-    noteTextColor: '#0c0f1d', // --rican-black
-    noteBorderColor: '#f97946', // --mandarin
-
-    // Error
-    errorBkgColor: '#f87171', // --text-error
-    errorTextColor: '#b91c1c', // --text-error
-
-    // Flowchart specific
-    nodeBorder: '#97f0e5', // --rican-mint
-    nodeTextColor: '#0c0f1d', // --rican-black
-    edgeLabelBackground: '#eafcfa', // --mint-500
-    titleColor: '#0a0d1a', // --text-primary
-
-    // Sequence Diagram specific
-    actorBkg: '#f7f7f7', // --rican-white
-    actorBorder: '#97f0e5', // --rican-mint
-    actorTextColor: '#0c0f1d', // --rican-black
-    actorLineColor: '#37c5b3', // --mint-800
-    signalColor: '#0a0d1a', // --text-primary
-    signalTextColor: '#0a0d1a', // --text-primary
-    labelBoxBkgColor: '#f7f7f7', // --rican-white
-    labelBoxBorderColor: '#97f0e5', // --rican-mint
-    labelTextColor: '#0c0f1d', // --rican-black
-    loopTextColor: '#0c0f1d', // --rican-black
-    activationBorderColor: '#f6ce9e', // --pears
-    activationBkgColor: '#f6ce9e', // --pears
-    sequenceNumberColor: '#0a0d1a', // --text-primary
-
-    // Gantt specific
-    sectionBkgColor: '#eafcfa', // --mint-500
-    altSectionBkgColor: '#f7f7f7', // --rican-white
-    sectionBkgColor2: '#eafcfa', // --mint-500
-    taskBorderColor: '#97f0e5', // --rican-mint
-    taskBkgColor: '#eafcfa', // --mint-500
-    activeTaskBorderColor: '#0c0f1d', // --rican-black
-    activeTaskBkgColor: '#37c5b3', // --mint-800
-    gridColor: '#e5e5e5', // Light grey
-    doneTaskBkgColor: '#cbfaf4', // --mint-600
-    doneTaskBorderColor: '#97f0e5', // --rican-mint
-    critBorderColor: '#b91c1c', // --text-error
-    critBkgColor: '#f87171', // --text-error
-    todayLineColor: '#b91c1c', // --text-error
-    taskTextColor: '#0c0f1d', // --rican-black
-    taskTextOutsideColor: '#0c0f1d', // --rican-black
-    taskTextLightColor: '#0c0f1d', // --rican-black
-    taskTextDarkColor: '#0c0f1d', // --rican-black
-    taskTextClickableColor: '#2563eb', // --focus-ring
-
-    // State Diagram specific
-    transitionColor: '#37c5b3', // --mint-800
-    transitionLabelColor: '#0a0d1a', // --text-primary
-    stateLabelColor: '#0a0d1a', // --text-primary
-    stateBkg: '#eafcfa', // --mint-500
-    labelBackgroundColor: '#f7f7f7', // --rican-white
-    compositeBackground: '#f7f7f7', // --rican-white
-    altBackground: '#e9ccff', // --grape-500
-    compositeTitleBackground: '#f7f7f7', // --rican-white
-    compositeBorder: '#97f0e5', // --rican-mint
-    innerEndBackground: '#97f0e5', // --rican-mint
-    specialStateColor: '#0a0d1a', // --text-primary
-
-    // Class Diagram specific
-    classText: '#0a0d1a', // --text-primary
-    attributeBackgroundColorOdd: '#f7f7f7', // --rican-white
-    attributeBackgroundColorEven: '#eafcfa', // --mint-500
-
-    // User Journey specific
-    fillType0: '#eafcfa', // --mint-500
-    fillType1: '#f6ce9e', // --pears
-    fillType2: '#8cf28a', // --lime
-    fillType3: '#f946ac', // --guava
-    fillType4: '#f97946', // --mandarin
-    fillType5: '#613dff', // --blueberry
-    fillType6: '#f9d546', // --banana
-    fillType7: '#4a3b2b', // --almond
-
-    // Pie Chart specific
-    pie1: '#eafcfa', // --mint-500
-    pie2: '#f6ce9e', // --pears
-    pie3: '#8cf28a', // --lime
-    pie4: '#f946ac', // --guava
-    pie5: '#f97946', // --mandarin
-    pie6: '#613dff', // --blueberry
-    pie7: '#f9d546', // --banana
-    pie8: '#4a3b2b', // --almond
-    pie9: '#089280', // --mint-900
-    pie10: '#37c5b3', // --mint-800
-    pie11: '#97f0e5', // --rican-mint
-    pie12: '#cbfaf4', // --mint-600
-    pieTitleTextSize: '25px',
-    pieTitleTextColor: '#0c0f1d', // --rican-black
-    pieSectionTextSize: '17px',
-    pieSectionTextColor: '#0c0f1d', // --rican-black
-    pieLegendTextSize: '17px',
-    pieLegendTextColor: '#0c0f1d', // --rican-black
-    pieStrokeColor: '#0c0f1d', // --rican-black
-    pieStrokeWidth: '2px',
-    pieOuterStrokeWidth: '2px',
-    pieOuterStrokeColor: '#0c0f1d', // --rican-black
-    pieOpacity: '0.7',
-
-    // Quadrant Chart specific
-    quadrant1Fill: '#eafcfa', // --mint-500
-    quadrant2Fill: '#f6ce9e', // --pears
-    quadrant3Fill: '#8cf28a', // --lime
-    quadrant4Fill: '#f946ac', // --guava
-    quadrant1TextFill: '#0c0f1d', // --rican-black
-    quadrant2TextFill: '#0c0f1d', // --rican-black
-    quadrant3TextFill: '#0c0f1d', // --rican-black
-    quadrant4TextFill: '#0c0f1d', // --rican-black
-    quadrantPointFill: '#0c0f1d', // --rican-black
-    quadrantPointTextFill: '#0c0f1d', // --rican-black
-    quadrantXAxisTextFill: '#0c0f1d', // --rican-black
-    quadrantYAxisTextFill: '#0c0f1d', // --rican-black
-    quadrantInternalBorderStrokeFill: '#97f0e5', // --rican-mint
-    quadrantExternalBorderStrokeFill: '#97f0e5', // --rican-mint
-    quadrantTitleFill: '#0c0f1d', // --rican-black
-
-    // XY Chart specific
-    xyChart: {
-      backgroundColor: '#f7f7f7', // --rican-white
-      titleColor: '#0c0f1d', // --rican-black
-      xAxisTitleColor: '#0c0f1d', // --rican-black
-      xAxisLabelColor: '#0c0f1d', // --rican-black
-      xAxisTickColor: '#0c0f1d', // --rican-black
-      xAxisLineColor: '#0c0f1d', // --rican-black
-      yAxisTitleColor: '#0c0f1d', // --rican-black
-      yAxisLabelColor: '#0c0f1d', // --rican-black
-      yAxisTickColor: '#0c0f1d', // --rican-black
-      yAxisLineColor: '#0c0f1d', // --rican-black
-      plotColorPalette: '#eafcfa,#f6ce9e,#8cf28a,#f946ac,#f97946,#613dff,#f9d546,#4a3b2b,#089280,#37c5b3', // Your palette
-    },
-
-    // Git Graph specific
-    git0: '#eafcfa', // --mint-500
-    git1: '#f6ce9e', // --pears
-    git2: '#8cf28a', // --lime
-    git3: '#f946ac', // --guava
-    git4: '#f97946', // --mandarin
-    git5: '#613dff', // --blueberry
-    git6: '#f9d546', // --banana
-    git7: '#4a3b2b', // --almond
-    gitInv0: '#0c0f1d', // --rican-black
-    gitInv1: '#0c0f1d', // --rican-black
-    gitInv2: '#0c0f1d', // --rican-black
-    gitInv3: '#0c0f1d', // --rican-black
-    gitInv4: '#0c0f1d', // --rican-black
-    gitInv5: '#0c0f1d', // --rican-black
-    gitInv6: '#0c0f1d', // --rican-black
-    gitInv7: '#0c0f1d', // --rican-black
-    branchLabelColor: '#0c0f1d', // --rican-black
-    gitBranchLabel0: '#0c0f1d', // --rican-black
-    gitBranchLabel1: '#0c0f1d', // --rican-black
-    gitBranchLabel2: '#0c0f1d', // --rican-black
-    gitBranchLabel3: '#0c0f1d', // --rican-black
-    gitBranchLabel4: '#0c0f1d', // --rican-black
-    gitBranchLabel5: '#0c0f1d', // --rican-black
-    gitBranchLabel6: '#0c0f1d', // --rican-black
-    gitBranchLabel7: '#0c0f1d', // --rican-black
-    tagLabelColor: '#0c0f1d', // --rican-black
-    tagLabelBackground: '#eafcfa', // --mint-500
-    tagLabelBorder: '#97f0e5', // --rican-mint
-    tagLabelFontSize: '10px',
-    commitLabelColor: '#0c0f1d', // --rican-black
-    commitLabelBackground: '#f6ce9e', // --pears
-    commitLabelFontSize: '10px',
-
-    // Class Diagram specific
-    classText: '#0a0d1a', // --text-primary
-    attributeBackgroundColorOdd: '#f7f7f7', // --rican-white
-    attributeBackgroundColorEven: '#eafcfa', // --mint-500
-  };
-
-  const darkThemeConfig = {
-    // General
-    fontFamily: 'Inter Tight, sans-serif',
-    fontSize: '16px',
-    textColor: '#fafafa', // --text-primary
-    darkMode: true,
-    background: '#0c0f1d', // --rican-black
-
-    // Nodes
-    primaryColor: '#1a1d2e', // --bg-secondary
-    primaryTextColor: '#fafafa', // --text-primary
-    primaryBorderColor: '#37c5b3', // --mint-800
-    secondaryColor: '#613dff', // --blueberry
-    secondaryTextColor: '#fafafa', // Derived from --text-primary
-    secondaryBorderColor: '#97f0e5', // Derived from --text-accent
-    tertiaryColor: '#f946ac', // --guava
-    tertiaryTextColor: '#fafafa', // Derived from --text-primary
-    tertiaryBorderColor: '#f759b7', // Derived from --guava
-
-    // Lines/Edges (High Contrast for Dark Theme)
-    lineColor: '#f7f7f7', // --rican-white
-    arrowheadColor: '#f7f7f7', // --rican-white
-    edgeColor: '#f7f7f7', // --rican-white
-    defaultLinkColor: '#f7f7f7', // --rican-white
-
-    // Clusters
-    clusterBkg: '#252842', // --bg-alt
-    clusterBorder: '#a56ff1', // --grape-800
-
-    // Notes
-    noteBkgColor: '#f9d546', // --banana
-    noteTextColor: '#0c0f1d', // --rican-black
-    noteBorderColor: '#f97946', // --mandarin
-
-    // Error
-    errorBkgColor: '#b91c1c', // --text-error
-    errorTextColor: '#f87171', // --text-error
-
-    // Flowchart specific
-    nodeBorder: '#37c5b3', // --mint-800
-    nodeTextColor: '#fafafa', // --text-primary
-    edgeLabelBackground: '#1a1d2e', // --bg-secondary
-    titleColor: '#fafafa', // --text-primary
-
-    // Sequence Diagram specific
-    actorBkg: '#0c0f1d', // --rican-black
-    actorBorder: '#37c5b3', // --mint-800
-    actorTextColor: '#fafafa', // --text-primary
-    actorLineColor: '#f7f7f7', // --rican-white
-    signalColor: '#fafafa', // --text-primary
-    signalTextColor: '#fafafa', // --text-primary
-    labelBoxBkgColor: '#0c0f1d', // --rican-black
-    labelBoxBorderColor: '#37c5b3', // --mint-800
-    labelTextColor: '#fafafa', // --text-primary
-    loopTextColor: '#fafafa', // --text-primary
-    activationBorderColor: '#613dff', // --blueberry
-    activationBkgColor: '#613dff', // --blueberry
-    sequenceNumberColor: '#fafafa', // --text-primary
-
-    // Gantt specific
-    sectionBkgColor: '#1a1d2e', // --bg-secondary
-    altSectionBkgColor: '#0c0f1d', // --rican-black
-    sectionBkgColor2: '#1a1d2e', // --bg-secondary
-    taskBorderColor: '#37c5b3', // --mint-800
-    taskBkgColor: '#1a1d2e', // --bg-secondary
-    activeTaskBorderColor: '#fafafa', // --text-primary
-    activeTaskBkgColor: '#97f0e5', // --text-accent
-    gridColor: '#4a4a4a', // Dark grey
-    doneTaskBkgColor: '#252842', // --bg-alt
-    doneTaskBorderColor: '#37c5b3', // --mint-800
-    critBorderColor: '#f87171', // --text-error
-    critBkgColor: '#b91c1c', // --text-error
-    todayLineColor: '#f87171', // --text-error
-    taskTextColor: '#fafafa', // --text-primary
-    taskTextOutsideColor: '#fafafa', // --text-primary
-    taskTextLightColor: '#fafafa', // --text-primary
-    taskTextDarkColor: '#fafafa', // --text-primary
-    taskTextClickableColor: '#60a5fa', // --focus-ring
-
-    // State Diagram specific
-    transitionColor: '#f7f7f7', // --rican-white
-    transitionLabelColor: '#fafafa', // --text-primary
-    stateLabelColor: '#fafafa', // --text-primary
-    stateBkg: '#1a1d2e', // --bg-secondary
-    labelBackgroundColor: '#0c0f1d', // --rican-black
-    compositeBackground: '#0c0f1d', // --rican-black
-    altBackground: '#252842', // --bg-alt
-    compositeTitleBackground: '#0c0f1d', // --rican-black
-    compositeBorder: '#37c5b3', // --mint-800
-    innerEndBackground: '#37c5b3', // --mint-800
-    specialStateColor: '#fafafa', // --text-primary
-
-    // Class Diagram specific
-    classText: '#fafafa', // --text-primary
-    attributeBackgroundColorOdd: '#0c0f1d', // --rican-black
-    attributeBackgroundColorEven: '#1a1d2e', // --bg-secondary
-
-    // User Journey specific
-    fillType0: '#1a1d2e', // --bg-secondary
-    fillType1: '#613dff', // --blueberry
-    fillType2: '#f946ac', // --guava
-    fillType3: '#f97946', // --mandarin
-    fillType4: '#f9d546', // --banana
-    fillType5: '#4a3b2b', // --almond
-    fillType6: '#97f0e5', // --text-accent
-    fillType7: '#37c5b3', // --mint-800
-
-    // Pie Chart specific
-    pie1: '#1a1d2e', // --bg-secondary
-    pie2: '#613dff', // --blueberry
-    pie3: '#f946ac', // --guava
-    pie4: '#f97946', // --mandarin
-    pie5: '#f9d546', // --banana
-    pie6: '#4a3b2b', // --almond
-    pie7: '#97f0e5', // --text-accent
-    pie8: '#37c5b3', // --mint-800
-    pie9: '#089280', // --mint-900
-    pie10: '#cbfaf4', // --mint-600
-    pie11: '#eafcfa', // --mint-500
-    pie12: '#f7f7f7', // --rican-white
-    pieTitleTextSize: '25px',
-    pieTitleTextColor: '#fafafa', // --text-primary
-    pieSectionTextSize: '17px',
-    pieSectionTextColor: '#fafafa', // --text-primary
-    pieLegendTextSize: '17px',
-    pieLegendTextColor: '#fafafa', // --text-primary
-    pieStrokeColor: '#fafafa', // --text-primary
-    pieStrokeWidth: '2px',
-    pieOuterStrokeWidth: '2px',
-    pieOuterStrokeColor: '#fafafa', // --text-primary
-    pieOpacity: '0.7',
-
-    // Quadrant Chart specific
-    quadrant1Fill: '#1a1d2e', // --bg-secondary
-    quadrant2Fill: '#613dff', // --blueberry
-    quadrant3Fill: '#f946ac', // --guava
-    quadrant4Fill: '#f97946', // --mandarin
-    quadrant1TextFill: '#fafafa', // --text-primary
-    quadrant2TextFill: '#fafafa', // --text-primary
-    quadrant3TextFill: '#fafafa', // --text-primary
-    quadrant4TextFill: '#fafafa', // --text-primary
-    quadrantPointFill: '#fafafa', // --text-primary
-    quadrantPointTextFill: '#fafafa', // --text-primary
-    quadrantXAxisTextFill: '#fafafa', // --text-primary
-    quadrantYAxisTextFill: '#fafafa', // --text-primary
-    quadrantInternalBorderStrokeFill: '#37c5b3', // --mint-800
-    quadrantExternalBorderStrokeFill: '#37c5b3', // --mint-800
-    quadrantTitleFill: '#fafafa', // --text-primary
-
-    // XY Chart specific
-    xyChart: {
-      backgroundColor: '#0c0f1d', // --rican-black
-      titleColor: '#fafafa', // --text-primary
-      xAxisTitleColor: '#fafafa', // --text-primary
-      xAxisLabelColor: '#fafafa', // --text-primary
-      xAxisTickColor: '#fafafa', // --text-primary
-      xAxisLineColor: '#fafafa', // --text-primary
-      yAxisTitleColor: '#fafafa', // --text-primary
-      yAxisLabelColor: '#fafafa', // --text-primary
-      yAxisTickColor: '#fafafa', // --text-primary
-      yAxisLineColor: '#fafafa', // --text-primary
-      plotColorPalette: '#1a1d2e,#613dff,#f946ac,#f97946,#f9d546,#4a3b2b,#97f0e5,#37c5b3,#089280,#cbfaf4', // Your palette
-    },
-
-    // Git Graph specific
-    git0: '#1a1d2e', // --bg-secondary
-    git1: '#613dff', // --blueberry
-    git2: '#f946ac', // --guava
-    git3: '#f97946', // --mandarin
-    git4: '#f9d546', // --banana
-    git5: '#4a3b2b', // --almond
-    git6: '#97f0e5', // --text-accent
-    git7: '#37c5b3', // --mint-800
-    gitInv0: '#fafafa', // --text-primary
-    gitInv1: '#fafafa', // --text-primary
-    gitInv2: '#fafafa', // --text-primary
-    gitInv3: '#fafafa', // --text-primary
-    gitInv4: '#fafafa', // --text-primary
-    gitInv5: '#fafafa', // --text-primary
-    gitInv6: '#fafafa', // --text-primary
-    gitInv7: '#fafafa', // --text-primary
-    branchLabelColor: '#fafafa', // --text-primary
-    gitBranchLabel0: '#fafafa', // --text-primary
-    gitBranchLabel1: '#fafafa', // --text-primary
-    gitBranchLabel2: '#fafafa', // --text-primary
-    gitBranchLabel3: '#fafafa', // --text-primary
-    gitBranchLabel4: '#fafafa', // --text-primary
-    gitBranchLabel5: '#fafafa', // --text-primary
-    gitBranchLabel6: '#fafafa', // --text-primary
-    gitBranchLabel7: '#fafafa', // --text-primary
-    tagLabelColor: '#fafafa', // --text-primary
-    tagLabelBackground: '#1a1d2e', // --bg-secondary
-    tagLabelBorder: '#37c5b3', // --mint-800
-    tagLabelFontSize: '10px',
-    commitLabelColor: '#fafafa', // --text-primary
-    commitLabelBackground: '#613dff', // --blueberry
-    commitLabelFontSize: '10px',
-
-    // Class Diagram specific
-    classText: '#fafafa', // --text-primary
-    attributeBackgroundColorOdd: '#0c0f1d', // --rican-black
-    attributeBackgroundColorEven: '#1a1d2e', // --bg-secondary
-  };
-
   const [syntax, setSyntax] = useState(`sequenceDiagram
     participant User
     participant Renderer as React UI (Renderer)
@@ -464,31 +98,198 @@ export const Mermaid = () => {
     end
     note right of Renderer: 'dwallet client objects' follows similar flow`);
   const [diagram, setDiagram] = useState('');
+  const [mermaid, setMermaid] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState(null);
+  const [loadingProgress] = useState(0);
   const rightRef = useRef(null);
+  const intersectionRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const isDark = theme === 'dark';
+  const { record } = usePerformanceMonitor('Mermaid');
 
+  // Intersection Observer for intelligent preloading
   useEffect(() => {
-    const currentThemeConfig = {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+            preloadMermaidChunks();
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '50px' },
+    );
+
+    if (intersectionRef.current) {
+      observer.observe(intersectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Stable mermaid configuration to prevent infinite re-renders
+  const mermaidConfig = useMemo(() => {
+    const config = {
       theme: 'base',
-      themeVariables: theme === 'light' ? lightThemeConfig : darkThemeConfig,
+      fontFamily: 'Inter Tight, sans-serif',
+      fontSize: '16px',
+      textColor: isDark ? '#fafafa' : '#0a0d1a',
+      themeVariables: {
+        // Core theme variables
+        fontFamily: 'Inter Tight, sans-serif',
+        fontSize: '16px',
+        textColor: isDark ? '#fafafa' : '#0a0d1a',
+        darkMode: isDark,
+        background: isDark ? '#0c0f1d' : '#f7f7f7',
+
+        // Primary colors
+        primaryColor: isDark ? '#1a1d2e' : '#eafcfa',
+        primaryTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        primaryBorderColor: isDark ? '#37c5b3' : '#97f0e5',
+
+        // Secondary colors
+        secondaryColor: isDark ? '#613dff' : '#f6ce9e',
+        secondaryTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        secondaryBorderColor: isDark ? '#97f0e5' : '#f97946',
+
+        // Tertiary colors
+        tertiaryColor: isDark ? '#f946ac' : '#8cf28a',
+        tertiaryTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        tertiaryBorderColor: isDark ? '#f759b7' : '#6bcc69',
+
+        // Line and edge colors
+        lineColor: isDark ? '#f7f7f7' : '#37c5b3',
+        arrowheadColor: isDark ? '#f7f7f7' : '#37c5b3',
+        edgeColor: isDark ? '#f7f7f7' : '#37c5b3',
+        defaultLinkColor: isDark ? '#f7f7f7' : '#37c5b3',
+
+        // Cluster colors
+        clusterBkg: isDark ? '#252842' : '#e9ccff',
+        clusterBorder: isDark ? '#a56ff1' : '#c584f6',
+
+        // Note colors
+        noteBkgColor: '#f9d546',
+        noteTextColor: '#0c0f1d',
+        noteBorderColor: '#f97946',
+
+        // Error colors
+        errorBkgColor: isDark ? '#b91c1c' : '#f87171',
+        errorTextColor: isDark ? '#f87171' : '#b91c1c',
+
+        // Node colors
+        nodeBorder: isDark ? '#37c5b3' : '#97f0e5',
+        nodeTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        edgeLabelBackground: isDark ? '#1a1d2e' : '#eafcfa',
+        // Title color
+        titleColor: isDark ? '#fafafa' : '#0a0d1a',
+
+        // Sequence diagram colors
+        actorBkg: isDark ? '#0c0f1d' : '#f7f7f7',
+        actorBorder: isDark ? '#37c5b3' : '#97f0e5',
+        actorTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        actorLineColor: isDark ? '#f7f7f7' : '#37c5b3',
+        signalColor: isDark ? '#f7f7f7' : '#37c5b3',
+        signalTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        labelBoxBkgColor: isDark ? '#1a1d2e' : '#eafcfa',
+        labelBoxBorderColor: isDark ? '#37c5b3' : '#97f0e5',
+        labelTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        loopTextColor: isDark ? '#fafafa' : '#0c0f1d',
+        activationBorderColor: isDark ? '#97f0e5' : '#37c5b3',
+        activationBkgColor: isDark ? '#252842' : '#f0fffe',
+        sequenceNumberColor: isDark ? '#fafafa' : '#0c0f1d',
+
+        // Gantt diagram colors
+        section0: isDark ? '#1a1d2e' : '#eafcfa',
+        section1: isDark ? '#613dff' : '#f6ce9e',
+        section2: isDark ? '#f946ac' : '#8cf28a',
+        section3: isDark ? '#37c5b3' : '#fce4a6',
+
+        // Git diagram colors
+        git0: isDark ? '#1a1d2e' : '#eafcfa',
+        git1: isDark ? '#613dff' : '#f6ce9e',
+        git2: isDark ? '#f946ac' : '#8cf28a',
+        git3: isDark ? '#37c5b3' : '#fce4a6',
+        git4: isDark ? '#f759b7' : '#f0c5d8',
+        git5: isDark ? '#97f0e5' : '#d4b5f7',
+        git6: isDark ? '#f97946' : '#b8e6d3',
+        git7: isDark ? '#6bcc69' : '#ffd5a6',
+
+        // Additional customizations
+        pieTitleTextSize: '20px',
+        pieTitleTextColor: isDark ? '#fafafa' : '#0a0d1a',
+        pieOuterStrokeWidth: '2px',
+        pieStrokeColor: isDark ? '#37c5b3' : '#0a0d1a',
+        pieOpacity: '0.9',
+
+        // Journey diagram colors
+        fillType0: isDark ? '#1a1d2e' : '#eafcfa',
+        fillType1: isDark ? '#613dff' : '#f6ce9e',
+        fillType2: isDark ? '#f946ac' : '#8cf28a',
+        fillType3: isDark ? '#37c5b3' : '#fce4a6',
+        fillType4: isDark ? '#f759b7' : '#f0c5d8',
+        fillType5: isDark ? '#97f0e5' : '#d4b5f7',
+        fillType6: isDark ? '#f97946' : '#b8e6d3',
+        fillType7: isDark ? '#6bcc69' : '#ffd5a6',
+      },
     };
-    console.log('Mermaid Initialize Config:', currentThemeConfig);
-    mermaid.initialize(currentThemeConfig);
+    return config;
+  }, [isDark]);
+
+  // Load mermaid library with progress tracking - ONLY ONCE
+  useEffect(() => {
+    const initializeMermaid = async () => {
+      try {
+        setIsLoading(true);
+
+        if (!mermaid) {
+          const mermaidLib = await loadMermaid();
+          setMermaid(mermaidLib);
+          setIsLoaded(true);
+        }
+      } catch (error) {
+        console.error('Failed to load Mermaid library:', error);
+        setError(error);
+        setIsLoaded(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Only initialize once - no dependencies to prevent infinite loops
+    if (!mermaid && !isLoading) {
+      initializeMermaid();
+    }
+  }, [mermaid, isLoading]); // Include dependencies as per React principles
+
+  // Render diagram when syntax or theme changes
+  useEffect(() => {
+    if (!mermaid || !isLoaded || !syntax) return;
 
     const renderDiagram = async () => {
       try {
-        // Clear previous diagram to force re-render with new theme
+        // Clear previous diagram
         if (rightRef.current) {
           rightRef.current.innerHTML = '';
         }
+
+        // Re-initialize with current config for theme changes
+        mermaid.initialize(mermaidConfig);
+
         const { svg } = await mermaid.render('mermaid-graph', syntax);
         setDiagram(svg);
+        setError(null);
+        // Only record successful renders with meaningful data
+        record('diagram-rendered', { syntaxLength: syntax.length, theme });
       } catch (error) {
         setDiagram(`<p>Error rendering diagram: ${error.message}</p>`);
+        setError(error);
+        record('render-error', { error: error.message });
       }
     };
 
     renderDiagram();
-  }, [syntax, theme]);
+  }, [syntax, theme, isLoaded, mermaid, mermaidConfig, record]); // Remove record dependency to prevent infinite loops
 
   const downloadSVG = () => {
     if (!diagram) return;
@@ -505,58 +306,102 @@ export const Mermaid = () => {
     const svgElement = rightRef.current?.querySelector('svg');
     if (!svgElement) return;
 
-    const canvas = document.createElement('canvas');
-    const bbox = svgElement.getBBox();
-    canvas.width = bbox.width * 2; // Higher resolution
-    canvas.height = bbox.height * 2;
-    const ctx = canvas.getContext('2d');
-    ctx.scale(2, 2);
+    try {
+      const canvas = document.createElement('canvas');
+      const bbox = svgElement.getBBox();
+      canvas.width = bbox.width * 2; // Higher resolution
+      canvas.height = bbox.height * 2;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    const img = new Image();
-    const svgData = new XMLSerializer().serializeToString(svgElement);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
+      ctx.scale(2, 2);
 
-    img.onload = () => {
-      ctx.drawImage(img, 0, 0);
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const pngUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = pngUrl;
-          a.download = 'diagram.png';
-          a.click();
-          URL.revokeObjectURL(pngUrl);
-        }
-      }, 'image/png');
-      URL.revokeObjectURL(url);
-    };
+      const img = new Image();
+      const svgData = new XMLSerializer().serializeToString(svgElement);
+      const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
 
-    img.src = url;
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const pngUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = pngUrl;
+            a.download = 'diagram.png';
+            a.click();
+            URL.revokeObjectURL(pngUrl);
+          }
+        }, 'image/png');
+        URL.revokeObjectURL(url);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+    } catch (error) {
+      console.error('Error generating PNG:', error);
+    }
   };
 
+  // Use the already defined getMermaidConfig function consistently
+
   return (
-    <section className="section">
+    <section className="section" ref={intersectionRef}>
       <div className="container">
         <h2 className="section-title">Mermaid.js</h2>
-        <div className="mermaid-container">
-          <div className="mermaid-editor">
-            <textarea
-              value={syntax}
-              onChange={(e) => setSyntax(e.target.value)}
-            />
+
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            Error: {error.message}
+          </div>
+        )}
+
+        {!isLoaded && !error && <MermaidLoading />}
+
+        {loadingProgress > 0 && loadingProgress < 100 && (
+          <div className="loading-progress">
+            <div className="progress-bar" style={{ width: `${loadingProgress}%` }}></div>
+            <span className="progress-text">{loadingProgress}% loaded</span>
+          </div>
+        )}
+
+        {isLoaded && (
+          <div className="mermaid-container">
+            <div className="mermaid-editor-diagram-wrapper">
+              <div className="mermaid-editor">
+                <textarea
+                  value={syntax}
+                  onChange={(e) => setSyntax(e.target.value)}
+                  placeholder="Enter your Mermaid syntax here..."
+                />
+              </div>
+              <div
+                className="mermaid-diagram"
+                ref={rightRef}
+                dangerouslySetInnerHTML={{ __html: diagram }}
+              />
+            </div>
             <div className="mermaid-buttons">
-              <button className="btn btn-primary" onClick={downloadSVG}>Download SVG</button>
-              <button className="btn btn-secondary" onClick={downloadPNG}>Download PNG</button>
+              <button className="btn btn-primary" onClick={downloadSVG}>
+                Download SVG
+              </button>
+              <button className="btn btn-secondary" onClick={downloadPNG}>
+                Download PNG
+              </button>
             </div>
           </div>
-          <div
-            className="mermaid-diagram"
-            ref={rightRef}
-            dangerouslySetInnerHTML={{ __html: diagram }}
-          />
-        </div>
+        )}
       </div>
     </section>
   );
 };
+
+MermaidComponent.propTypes = {
+  diagramDefinition: PropTypes.string,
+  theme: PropTypes.oneOf(['light', 'dark']),
+};
+
+export const Mermaid = React.memo(MermaidComponent);
