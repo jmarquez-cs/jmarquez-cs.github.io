@@ -1,11 +1,13 @@
-import React, { Suspense, useCallback, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Navigation } from './components/Navigation';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
-import { Contact } from './components/Contact';
+import { ColorPalette } from './components/ColorPalette';
+import { Footer } from './components/Footer';
 import { ThemeToggle } from './components/ThemeToggle';
 import { ErrorBoundary } from './components/ErrorBoundary';
+// WaveBackground imported via lazy loading below
 import { useTheme } from './hooks/useTheme';
 import { useConfetti } from './hooks/useConfetti';
 import { useGameVisibility } from './contexts/GameVisibilityContext';
@@ -16,6 +18,7 @@ import PerformanceDashboard from './components/PerformanceDashboard';
 import PerformanceDashboardToggle from './components/PerformanceDashboard/PerformanceDashboardToggle';
 import { usePerformanceDashboardVisibility } from './hooks/usePerformanceDashboardVisibility';
 import BundleAnalyzerToggle from './components/BundleAnalyzer/BundleAnalyzerToggle';
+import SkillsRadar from './components/SkillsRadar';
 
 // Strategic lazy loading with resource hints
 const Portfolio = lazy(() =>
@@ -59,6 +62,24 @@ const BundleAnalyzer = lazy(() =>
     default: module.BundleAnalyzer,
   })),
 );
+
+// Lazy load WaveBackground with enhanced error boundary
+const WaveBackground = lazy(() =>
+  import('./components/WaveBackground').then((module) => ({
+    default: module.WaveBackground,
+  })),
+);
+
+// Pure CSS WaveBackground - no JavaScript positioning
+const WaveBackgroundContainer = () => {
+  return (
+    <ErrorBoundary componentName="WaveBackground" isolateErrors={true}>
+      <Suspense fallback={null}>
+        <WaveBackground />
+      </Suspense>
+    </ErrorBoundary>
+  );
+};
 
 // Enhanced loading component with skeleton
 
@@ -104,10 +125,34 @@ const AppComponent = () => {
     }
   }, []);
 
-  const handleThemeToggle = useCallback(() => {
-    toggleTheme();
-    triggerConfetti();
-  }, [toggleTheme, triggerConfetti]);
+  // Portfolio data matching SkillsRadar interface contract
+  const portfolioData = useMemo(
+    () => ({
+      projects: {
+        byId: {
+          1: {
+            technologies: [
+              { name: 'JavaScript', years: 8 },
+              { name: 'React', years: 5 },
+              { name: 'Node.js', years: 6 },
+              { name: 'TypeScript', years: 4 },
+              { name: 'Python', years: 7 },
+              { name: 'AWS', years: 5 },
+              { name: 'Docker', years: 4 },
+              { name: 'PostgreSQL', years: 6 },
+            ],
+          },
+        },
+      },
+    }),
+    [],
+  );
+
+  // Memoized WaveBackground container for performance
+  const memoizedWaveBackground = useMemo(
+    () => <WaveBackgroundContainer />,
+    [], // No dependencies - WaveBackgroundContainer handles its own state
+  );
 
   return (
     <div className="App">
@@ -127,21 +172,40 @@ const AppComponent = () => {
           </LazySection>
         </ErrorBoundary>
 
-        <Contact />
-
-        {/* Mermaid with intersection-based lazy loading*/}
-        <ErrorBoundary componentName="Mermaid Diagram">
+        <ErrorBoundary componentName="SkillsRadar">
           <LazySection
-            fallback={<GlobalLoading componentName="Mermaid Diagram" />}
-            threshold={0.1}
-            rootMargin="200px"
+            fallback={<GlobalLoading componentName="Skills Radar" />}
+            threshold={0.2}
+            rootMargin="100px"
           >
-            <Mermaid />
+            <SkillsRadar portfolioData={portfolioData} animated={true} showLegend={true} />
+          </LazySection>
+        </ErrorBoundary>
+
+        <LazySection>
+          <section id="palette" className="section">
+            <div className="container">
+              <h2 className="section-title">COLOR PALETTE</h2>
+              <ColorPalette />
+            </div>
+          </section>
+        </LazySection>
+
+        <ErrorBoundary componentName="Mermaid">
+          <LazySection
+            fallback={<GlobalLoading componentName="Mermaid Diagrams" />}
+            threshold={0.2}
+            rootMargin="100px"
+          >
+            <Suspense fallback={<GlobalLoading componentName="Mermaid" />}>
+              <Mermaid />
+            </Suspense>
           </LazySection>
         </ErrorBoundary>
       </main>
 
       <ThemeToggle />
+      <Footer />
 
       {/* Games modal - only load when needed */}
       <ErrorBoundary componentName="Games Modal">
@@ -149,12 +213,6 @@ const AppComponent = () => {
           <Games />
         </Suspense>
       </ErrorBoundary>
-
-      <footer className="footer">
-        <div className="container">
-          <p>&copy; 2025 John Marquez. Fractional CTO & Blockchain Expert.</p>
-        </div>
-      </footer>
 
       {/* Bundle Analyzer - development only */}
       {process.env.NODE_ENV === 'development' && bundleAnalyzerVisible && (

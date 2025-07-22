@@ -15,7 +15,10 @@ const PortfolioComponent = () => {
     getProjectTechnologies,
     selectedCategory,
     setSelectedCategory,
+    selectedDiscipline,
+    setSelectedDiscipline,
     categories,
+    disciplines,
   } = usePortfolio();
 
   const handleProjectClick = useCallback(
@@ -58,9 +61,20 @@ const PortfolioComponent = () => {
     (category) => {
       startTransition(() => {
         setSelectedCategory(category);
+        setSelectedDiscipline('all'); // Reset discipline when changing category
       });
     },
-    [setSelectedCategory, startTransition],
+    [setSelectedCategory, setSelectedDiscipline, startTransition],
+  );
+
+  const handleDisciplineFilter = useCallback(
+    (discipline) => {
+      startTransition(() => {
+        setSelectedDiscipline(discipline);
+        setSelectedCategory('all'); // Reset category when changing discipline
+      });
+    },
+    [setSelectedDiscipline, setSelectedCategory, startTransition],
   );
 
   return (
@@ -68,24 +82,51 @@ const PortfolioComponent = () => {
       <div className="container">
         <h2 className="section-title">PORTFOLIO</h2>
 
-        {/* Category Filter */}
-        <div className="portfolio-filters">
-          <button
-            className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-            onClick={() => handleCategoryFilter('all')}
-          >
-            All Projects
-          </button>
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              className={`filter-btn ${selectedCategory === category.id ? 'active' : ''}`}
-              onClick={() => handleCategoryFilter(category.id)}
-              style={{ '--category-color': category.color }}
-            >
-              {category.name}
-            </button>
-          ))}
+        {/* Filter Tabs */}
+        <div className="portfolio-filter-tabs">
+          <div className="filter-tab-group">
+            <h3>Filter by Category</h3>
+            <div className="portfolio-filters">
+              <button
+                className={`filter-btn ${selectedCategory === 'all' ? 'active' : ''}`}
+                onClick={() => handleCategoryFilter('all')}
+              >
+                All Projects
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  className={`filter-btn ${selectedCategory === category.id ? 'active' : ''}`}
+                  onClick={() => handleCategoryFilter(category.id)}
+                  style={{ '--category-color': category.color }}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="filter-tab-group">
+            <h3>Filter by Discipline</h3>
+            <div className="portfolio-filters">
+              <button
+                className={`filter-btn ${selectedDiscipline === 'all' ? 'active' : ''}`}
+                onClick={() => handleDisciplineFilter('all')}
+              >
+                All Disciplines
+              </button>
+              {disciplines.map((discipline) => (
+                <button
+                  key={discipline.id}
+                  className={`filter-btn discipline-filter ${selectedDiscipline === discipline.id ? 'active' : ''}`}
+                  onClick={() => handleDisciplineFilter(discipline.id)}
+                  style={{ '--discipline-color': discipline.color }}
+                >
+                  {discipline.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="portfolio-grid">

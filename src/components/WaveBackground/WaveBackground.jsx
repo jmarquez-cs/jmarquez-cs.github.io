@@ -24,18 +24,6 @@ const WaveBackgroundComponent = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Track animation health
-    frameCountRef.current++;
-    const now = Date.now();
-    if (now - lastLogTimeRef.current > 5000) {
-      const fps = (frameCountRef.current / (now - lastLogTimeRef.current)) * 1000;
-      console.log(
-        `[WaveBackground] Animation health: ${fps.toFixed(1)} fps, ${frameCountRef.current} frames`,
-      );
-      frameCountRef.current = 0;
-      lastLogTimeRef.current = now;
-    }
-
     // Sine wave parameters - exactly like original
     const amplitude = 40;
     const frequency = 0.01;
@@ -212,7 +200,6 @@ const WaveBackgroundComponent = () => {
   }, []); // Empty deps - all values are defined inside the function
 
   useEffect(() => {
-    console.log('[WaveBackground] useEffect starting');
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -231,7 +218,6 @@ const WaveBackgroundComponent = () => {
     window.addEventListener('resize', handleResize);
 
     return () => {
-      console.log('[WaveBackground] Cleanup');
       window.removeEventListener('resize', handleResize);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);

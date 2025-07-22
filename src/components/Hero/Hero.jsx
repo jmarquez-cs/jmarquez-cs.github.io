@@ -1,164 +1,201 @@
-import React, { useCallback, useRef, useEffect } from 'react';
-import { useConfetti } from '../../hooks/useConfetti';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
+
+import TechnologyIcon from '../TechnologyIcon';
 import { WaveBackground } from '../WaveBackground';
 import './Hero.css';
 
 const HeroComponent = () => {
-  const { triggerConfetti } = useConfetti();
-  const cardRefs = useRef({});
   const heroRenderCount = useRef(0);
+  const heroSectionRef = useRef(null);
+  const [dynamicHeight, setDynamicHeight] = useState('100vh');
+  const swimlaneRef = useRef(null);
 
-  const handleCTAClick = useCallback(() => {
-    triggerConfetti();
-  }, [triggerConfetti]);
+  // Technology swimlane carousel - horizontal scrolling showcase
+  const technologySwimlane = [
+    // Core Frontend
+    { id: 1, size: 36, tier: 'primary' }, // React
+    { id: 25, size: 32, tier: 'primary' }, // JavaScript
 
-  const scrollToContact = useCallback(() => {
-    const element = document.getElementById('contact');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, []);
+    // Backend Systems
+    { id: 2, size: 34, tier: 'primary' }, // NodeJS
+    { id: 11, size: 30, tier: 'primary' }, // Python
+    { id: 18, size: 28, tier: 'secondary' }, // Go
 
-  const scrollToPortfolio = useCallback(() => {
-    const element = document.getElementById('portfolio');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, []);
+    // Cloud & DevOps
+    { id: 8, size: 32, tier: 'primary' }, // AWS
+    { id: 9, size: 28, tier: 'secondary' }, // GCP
+    { id: 4, size: 30, tier: 'primary' }, // Docker
+    { id: 6, size: 28, tier: 'secondary' }, // Kubernetes
 
-  const handleCardClick = useCallback(
-    (event, cardType) => {
-      event.preventDefault();
-      event.stopPropagation();
+    // Database & Storage
+    { id: 27, size: 26, tier: 'secondary' }, // PostgreSQL
+    { id: 3, size: 24, tier: 'secondary' }, // MongoDB
 
-      const card = event.currentTarget;
-      if (!card || !card.style) return;
+    // Blockchain & Security
+    { id: 12, size: 26, tier: 'accent' }, // Blockchain
+    { id: 14, size: 24, tier: 'accent' }, // Security
+    { id: 31, size: 22, tier: 'accent' }, // Ethereum
 
-      // Prevent multiple clicks during animation
-      if (
-        card.style.transform &&
-        card.style.transform !== '' &&
-        !card.style.transform.includes('scale(1)')
-      ) {
-        return;
-      }
+    // Infrastructure & Tools
+    { id: 21, size: 22, tier: 'ambient' }, // Express
+    { id: 29, size: 20, tier: 'ambient' }, // Nginx
+    { id: 35, size: 20, tier: 'ambient' }, // Git
+    { id: 10, size: 18, tier: 'discovery' }, // Prometheus
+  ];
 
-      const rect = card.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const clickX = event.clientX;
-      const clickY = event.clientY;
-
-      // Calculate direction from click point to card center
-      const deltaX = centerX - clickX;
-      const deltaY = centerY - clickY;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-      // Normalize the direction (or use random direction if click is at center)
-      const normalizedX = distance > 10 ? deltaX / distance : (Math.random() - 0.5) * 2;
-      const normalizedY = distance > 10 ? deltaY / distance : (Math.random() - 0.5) * 2;
-
-      // Create physics effect based on card type - crisp and fast
-      const effects = {
-        mint: {
-          moveDistance: 90,
-          rotation: 450,
-          scale: 1.4,
-          duration: 350,
-          easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-        },
-        grape: {
-          moveDistance: 70,
-          rotation: -270,
-          scale: 1.3,
-          duration: 300,
-          easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        },
-        lime: {
-          moveDistance: 110,
-          rotation: 540,
-          scale: 1.5,
-          duration: 400,
-          easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-        },
-      };
-
-      const effect = effects[cardType] || effects.mint;
-
-      // Disable the floating animation temporarily
-      card.style.animation = 'none';
-
-      // Apply the physics animation
-      card.style.transition = `transform ${effect.duration}ms ${effect.easing}`;
-      card.style.transform = `
-      translateX(${normalizedX * effect.moveDistance}px) 
-      translateY(${normalizedY * effect.moveDistance}px) 
-      rotate(${effect.rotation}deg) 
-      scale(${effect.scale})
-    `;
-
-      // Reset after animation - much faster
-      setTimeout(() => {
-        if (card && card.style && card.parentNode) {
-          card.style.transition = `transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1)`;
-          card.style.transform = 'translateX(0) translateY(0) rotate(0deg) scale(1)';
-
-          // Re-enable floating animation after reset
-          setTimeout(() => {
-            if (card && card.style && card.parentNode) {
-              card.style.animation = '';
-            }
-          }, 200);
-        }
-      }, effect.duration);
-
-      // Add haptic feedback if available
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-
-      // Trigger confetti for extra satisfaction
-      triggerConfetti({
-        particleCount: 30,
-        angle: (Math.atan2(-normalizedY, -normalizedX) * 180) / Math.PI,
-        spread: 60,
-        origin: {
-          x: clickX / window.innerWidth,
-          y: clickY / window.innerHeight,
-        },
-        colors:
-          cardType === 'mint' ? ['#97F0E5'] : cardType === 'grape' ? ['#C584F6'] : ['#8CF28A'],
-      });
-    },
-    [triggerConfetti],
-  );
-
-  // Cleanup function for any pending timeouts
+  // Dynamic height calculation based on footer height
   useEffect(() => {
-    const currentRefs = cardRefs.current;
-    return () => {
-      // Clear any pending animations on unmount
-      Object.values(currentRefs).forEach((card) => {
-        if (card && card.style) {
-          card.style.animation = '';
-          card.style.transform = '';
-          card.style.transition = '';
+    const calculateDynamicHeight = () => {
+      const footer = document.querySelector('.footer');
+      const navigation = document.querySelector('.navigation');
+
+      if (footer && navigation) {
+        const footerHeight = footer.offsetHeight;
+        const navHeight = navigation.offsetHeight;
+
+        // Calculate the ideal height: full viewport minus footer height
+        const calculatedHeight = `calc(100vh - ${footerHeight}px)`;
+
+        setDynamicHeight(calculatedHeight);
+
+        // Apply the height via CSS custom property and direct style
+        document.documentElement.style.setProperty('--hero-dynamic-height', calculatedHeight);
+
+        if (heroSectionRef.current) {
+          heroSectionRef.current.style.minHeight = calculatedHeight;
         }
+
+        console.log(
+          `[Hero] Dynamic height calculated: ${calculatedHeight} (Footer: ${footerHeight}px, Nav: ${navHeight}px)`,
+        );
+      }
+    };
+
+    // Calculate on mount
+    calculateDynamicHeight();
+
+    // Recalculate on window resize
+    const handleResize = () => {
+      requestAnimationFrame(calculateDynamicHeight);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Use ResizeObserver for more precise footer height changes
+    let footerObserver;
+    const footer = document.querySelector('.footer');
+    if (footer && 'ResizeObserver' in window) {
+      footerObserver = new ResizeObserver(() => {
+        requestAnimationFrame(calculateDynamicHeight);
       });
+      footerObserver.observe(footer);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (footerObserver) {
+        footerObserver.disconnect();
+      }
     };
   }, []);
 
-  // Track Hero renders to detect if it's causing WaveBackground issues
+  // Dynamic fade effect based on icon position
+  useEffect(() => {
+    const updateIconFadeEffects = () => {
+      if (!swimlaneRef.current) return;
+
+      const swimlaneRect = swimlaneRef.current.getBoundingClientRect();
+      const fadeZoneWidth = 400; // Match CSS variable
+      const icons = swimlaneRef.current.querySelectorAll('.tech-swimlane-icon');
+
+      icons.forEach((icon) => {
+        const iconRect = icon.getBoundingClientRect();
+        const iconCenter = iconRect.left + iconRect.width / 2;
+        const swimlaneLeft = swimlaneRect.left;
+        const swimlaneRight = swimlaneRect.right;
+
+        let opacity = 1;
+
+        // Calculate fade on left side
+        if (iconCenter < swimlaneLeft + fadeZoneWidth) {
+          const distanceFromLeft = iconCenter - swimlaneLeft;
+          opacity = Math.max(0, Math.min(1, distanceFromLeft / fadeZoneWidth));
+        }
+        // Calculate fade on right side
+        else if (iconCenter > swimlaneRight - fadeZoneWidth) {
+          const distanceFromRight = swimlaneRight - iconCenter;
+          opacity = Math.max(0, Math.min(1, distanceFromRight / fadeZoneWidth));
+        }
+
+        icon.style.opacity = opacity;
+      });
+    };
+
+    // Update fade effects on animation frame
+    const rafId = requestAnimationFrame(function updateLoop() {
+      updateIconFadeEffects();
+      requestAnimationFrame(updateLoop);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  // Track Hero renders for debugging (throttled logging)
   heroRenderCount.current++;
-  if (heroRenderCount.current % 100 === 0) {
+  if (heroRenderCount.current % 100 === 0 && process.env.NODE_ENV === 'development') {
     console.log('[Hero] Render count:', heroRenderCount.current);
   }
 
   return (
-    <section id="hero" className="hero">
-      {console.log('[Hero] About to render WaveBackground')}
-      <WaveBackground />
-      {console.log('[Hero] WaveBackground rendered')}
+    <section id="hero" className="hero" ref={heroSectionRef} style={{ minHeight: dynamicHeight }}>
+      {/* WaveBackground nested directly in Hero for desired positioning */}
+      <div className="hero-wave-background">
+        <WaveBackground />
+      </div>
+
+      {/* Technology swimlane - horizontal scrolling carousel above content */}
+      <div className="hero-tech-swimlane" ref={swimlaneRef}>
+        <div className="tech-swimlane-track">
+          {/* First set of icons */}
+          {technologySwimlane.map((tech, index) => (
+            <div key={`tech-${tech.id}-1`} className="tech-swimlane-icon" data-tier={tech.tier}>
+              <TechnologyIcon
+                technologyId={tech.id}
+                size={tech.size}
+                animated={false}
+                glowing={tech.tier === 'primary'}
+                showTooltip={true}
+              />
+            </div>
+          ))}
+          {/* Second set for seamless loop */}
+          {technologySwimlane.map((tech, index) => (
+            <div key={`tech-${tech.id}-2`} className="tech-swimlane-icon" data-tier={tech.tier}>
+              <TechnologyIcon
+                technologyId={tech.id}
+                size={tech.size}
+                animated={false}
+                glowing={tech.tier === 'primary'}
+                showTooltip={true}
+              />
+            </div>
+          ))}
+          {/* Third set for ultra-smooth infinite scroll */}
+          {technologySwimlane.map((tech, index) => (
+            <div key={`tech-${tech.id}-3`} className="tech-swimlane-icon" data-tier={tech.tier}>
+              <TechnologyIcon
+                technologyId={tech.id}
+                size={tech.size}
+                animated={false}
+                glowing={tech.tier === 'primary'}
+                showTooltip={true}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main content layer */}
       <div className="hero-content">
         <div className="hero-text">
           <h1 className="hero-title">
@@ -166,63 +203,12 @@ const HeroComponent = () => {
           </h1>
           <h2 className="hero-subtitle">DevSecOps & Blockchain Expert</h2>
           <p className="hero-description">
-            I build scalable blockchain solutions and secure cloud infrastructures for startups.
-            Specializing in Sui, Hedera, and enterprise-grade DevSecOps.
+            I scale emerging technology and secure cloud infrastructure.
           </p>
-          <div className="hero-cta">
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                handleCTAClick();
-                scrollToContact();
-              }}
-            >
-              Let&apos;s Connect
-            </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                handleCTAClick();
-                scrollToPortfolio();
-              }}
-            >
-              View Projects
-            </button>
-          </div>
-        </div>
-        <div className="hero-visual">
-          <button
-            ref={(el) => (cardRefs.current.mint = el)}
-            className="floating-card card-mint interactive-card"
-            onClick={(e) => handleCardClick(e, 'mint')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleCardClick(e, 'mint');
-              }
-            }}
-          ></button>
-          <button
-            ref={(el) => (cardRefs.current.grape = el)}
-            className="floating-card card-grape interactive-card"
-            onClick={(e) => handleCardClick(e, 'grape')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleCardClick(e, 'grape');
-              }
-            }}
-          ></button>
-          <button
-            ref={(el) => (cardRefs.current.lime = el)}
-            className="floating-card card-lime interactive-card easter-egg-card"
-            onClick={(e) => handleCardClick(e, 'lime')}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleCardClick(e, 'lime');
-              }
-            }}
-          ></button>
         </div>
       </div>
+
+      {/* Parallax performance logging removed to prevent re-render issues */}
     </section>
   );
 };

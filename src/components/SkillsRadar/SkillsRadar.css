@@ -1,0 +1,52 @@
+.skills-radar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  min-height: 600px;
+  margin-top: var(--space-8);
+}
+
+.skills-radar-chart {
+  max-width: 800px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .skills-radar-container {
+    padding: 10px;
+    min-height: 400px;
+    margin-top: var(--space-6);
+  }
+
+  .skills-radar-chart {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .skills-radar-container {
+    padding: 5px;
+    min-height: 300px;
+    margin-top: var(--space-4);
+  }
+}
+
+@media (max-width: 375px) {
+  .skills-radar-container {
+    padding: 5px;
+    min-height: 250px;
+    margin-top: var(--space-3);
+  }
+}
+
+/* Animation support */
+@media (prefers-reduced-motion: reduce) {
+  .skills-radar-container {
+    animation: none;
+  }
+}

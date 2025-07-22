@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef, Suspense, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../hooks/useTheme';
-import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import './mermaid.css';
 
 // Preload mermaid chunks when component becomes visible
@@ -48,55 +47,17 @@ const MermaidLoading = () => (
 // Interactive Mermaid Editor Component
 const MermaidComponent = () => {
   const { theme } = useTheme();
-  const [syntax, setSyntax] = useState(`sequenceDiagram
-    participant User
-    participant Renderer as React UI (Renderer)
-    participant IPCR as IPC Renderer
-    participant IPCM as IPC Main
-    participant Main as Main Process
-    participant CP as Child Process
-    participant Store as Redux Store
-
-    User->>Renderer: Click "Create Address"
-    Renderer->>IPCR: invoke('execute-cli', 'dwallet client new-address --json')
-    IPCR->>IPCM: handle('execute-cli')
-    IPCM->>Main: Execute command
-    Main->>CP: exec('dwallet client new-address --json')
-    CP->>Main: stdout (JSON: address, keypair), stderr, exitCode
-    Main->>Main: Parse and validate JSON
-    alt Valid JSON
-        Main->>IPCM: Return parsed JSON
-        IPCM->>IPCR: Resolve promise
-        IPCR->>Renderer: Receive JSON
-        Renderer->>Store: Dispatch updateAddresses(json)
-        Store->>Renderer: Update state
-        Renderer->>User: Display address/keypair in table
-        Renderer->>IPCR: invoke('execute-cli', 'dwallet client gas --json')
-        IPCR->>IPCM: handle('execute-cli')
-        IPCM->>Main: Execute command
-        Main->>CP: exec('dwallet client gas --json')
-        CP->>Main: stdout (JSON: gas objects), stderr, exitCode
-        Main->>Main: Parse and validate JSON
-        alt Valid JSON
-            Main->>IPCM: Return parsed JSON
-            IPCM->>IPCR: Resolve promise
-            IPCR->>Renderer: Receive JSON
-            Renderer->>Store: Dispatch updateBalances(json)
-            Store->>Renderer: Update state
-            Renderer->>User: Display balance in table
-        else Error
-            Main->>IPCM: Return error
-            IPCM->>IPCR: Reject promise
-            IPCR->>Renderer: Show error
-            Renderer->>User: Display error message
-        end
-    else Error
-        Main->>IPCM: Return error
-        IPCM->>IPCR: Reject promise
-        IPCR->>Renderer: Show error
-        Renderer->>User: Display error message
-    end
-    note right of Renderer: 'dwallet client objects' follows similar flow`);
+  const [syntax, setSyntax] = useState(`graph TD
+    A[Business Needs<br>Stakeholder Goals] -->|Identify Requirements| B{Fractional CTO}
+    B -->|Strategic Planning| C[Technical Strategy<br>Architecture Design]
+    B -->|Team Leadership| D[Development Teams<br>Agile Execution]
+    B -->|Infrastructure Oversight| E[Cloud & DevOps<br>Deployment]
+    C -->|Define Tech Stack| F[Technologies<br>e.g., GCP, Terraform, Docker]
+    D -->|CI/CD Pipelines| G[Development<br>Code & Test]
+    E -->|Scalability & Security| H[Production<br>Deployment]
+    F --> G
+    G --> H
+    H -->|Deliver Solutions| I[Business Outcomes<br>Client Success]`);
   const [diagram, setDiagram] = useState('');
   const [mermaid, setMermaid] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -105,9 +66,8 @@ const MermaidComponent = () => {
   const rightRef = useRef(null);
   const intersectionRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [diagramDimensions, setDiagramDimensions] = useState({ width: 0, height: 0 });
   const isDark = theme === 'dark';
-  const { record } = usePerformanceMonitor('Mermaid');
-
   // Intersection Observer for intelligent preloading
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -127,6 +87,35 @@ const MermaidComponent = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  // Resize Observer for responsive diagram sizing
+  useEffect(() => {
+    if (!rightRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setDiagramDimensions({ width, height });
+      }
+    });
+
+    resizeObserver.observe(rightRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Handle diagram resizing
+  useEffect(() => {
+    if (!rightRef.current || !diagram) return;
+
+    const svgElement = rightRef.current.querySelector('svg');
+    if (svgElement && diagramDimensions.width > 0) {
+      // Make SVG responsive to container size
+      svgElement.style.maxWidth = '100%';
+      svgElement.style.height = 'auto';
+      svgElement.style.width = 'auto';
+    }
+  }, [diagram, diagramDimensions]);
 
   // Stable mermaid configuration to prevent infinite re-renders
   const mermaidConfig = useMemo(() => {
@@ -279,17 +268,14 @@ const MermaidComponent = () => {
         const { svg } = await mermaid.render('mermaid-graph', syntax);
         setDiagram(svg);
         setError(null);
-        // Only record successful renders with meaningful data
-        record('diagram-rendered', { syntaxLength: syntax.length, theme });
       } catch (error) {
         setDiagram(`<p>Error rendering diagram: ${error.message}</p>`);
         setError(error);
-        record('render-error', { error: error.message });
       }
     };
 
     renderDiagram();
-  }, [syntax, theme, isLoaded, mermaid, mermaidConfig, record]); // Remove record dependency to prevent infinite loops
+  }, [syntax, theme, isLoaded, mermaid, mermaidConfig]);
 
   const downloadSVG = () => {
     if (!diagram) return;

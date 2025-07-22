@@ -8,7 +8,8 @@
 .mermaid-editor-diagram-wrapper {
   display: flex;
   gap: 2rem;
-  height: 547px; /* Fixed height for both sections */
+  min-height: 400px;
+  height: clamp(400px, 50vh, 600px); /* Responsive height */
 }
 
 .mermaid-editor {
@@ -48,17 +49,21 @@
   overflow: auto;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   position: relative;
   height: 100%;
   box-sizing: border-box;
+  min-height: 300px;
 }
 
 .mermaid-diagram svg {
   max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
   border-radius: 8px;
   background: var(--bg-primary);
+  object-fit: contain;
 }
 
 .mermaid-loading {
@@ -275,21 +280,51 @@
 
 /* Responsive Layout for Mobile */
 @media (max-width: 768px) {
+  .mermaid-container {
+    gap: 1rem;
+  }
+
   .mermaid-editor-diagram-wrapper {
     flex-direction: column;
-    height: auto; /* Allow auto height on mobile */
+    height: auto;
+    gap: 1rem;
   }
 
   .mermaid-editor,
   .mermaid-diagram {
-    height: 400px; /* Consistent height on mobile */
+    height: clamp(300px, 40vh, 450px);
+    min-height: 300px;
   }
 
   .mermaid-diagram {
-    order: 1; /* Diagram appears first */
+    order: 1;
+    align-items: center; /* Center on mobile for better UX */
   }
 
   .mermaid-editor {
-    order: 2; /* Editor appears second */
+    order: 2;
+  }
+
+  .mermaid-editor textarea {
+    font-size: 14px; /* Smaller font on mobile */
+  }
+
+  .mermaid-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mermaid-buttons .btn-primary,
+  .mermaid-buttons .btn-secondary {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .mermaid-editor,
+  .mermaid-diagram {
+    height: clamp(250px, 35vh, 350px);
   }
 }

@@ -1,0 +1,69 @@
+.technology-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.technology-cluster-icons {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.cluster-icon-wrapper {
+  margin-left: -0.5rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cluster-icon-wrapper:first-child {
+  margin-left: 0;
+}
+
+.technology-cluster.animated .cluster-icon-wrapper {
+  animation: slideInFromLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.technology-cluster:hover .cluster-icon-wrapper {
+  margin-left: 0.25rem;
+}
+
+.technology-cluster:hover .cluster-icon-wrapper:first-child {
+  margin-left: 0;
+}
+
+.overflow-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--gradient-secondary);
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--text-primary);
+  margin-left: 0.25rem;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cluster-icon-wrapper {
+    margin-left: -0.75rem;
+  }
+
+  .technology-cluster:hover .cluster-icon-wrapper {
+    margin-left: -0.25rem;
+  }
+}

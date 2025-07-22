@@ -95,25 +95,6 @@ const AboutComponent = () => {
               with extensive experience at companies like Cryptstax, Fathom PBC, Object Computing,
               and leading blockchain initiatives that have secured millions in funding.
             </p>
-            <div className="skills">
-              {skills.map((skill, index) => (
-                <span
-                  key={index}
-                  className="skill-tag"
-                  onClick={() => handleSkillClick(skill)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      handleSkillClick(skill);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={skill === 'Startups' ? 0 : -1} // Only make 'Startups' focusable
-                  style={{ cursor: skill === 'Startups' ? 'pointer' : 'default' }}
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
           </div>
           <div className="profile-image" style={{ position: 'relative' }}>
             <button
@@ -151,6 +132,66 @@ const AboutComponent = () => {
                 }}
               />
             </button>
+          </div>
+        </div>
+
+        {/* Skills Swimlane */}
+        <div className="skills-swimlane">
+          <div className="skills-track">
+            {/* First set of skills */}
+            {skills.map((skill, index) => (
+              <span
+                key={`skill-${index}-1`}
+                className="skill-tag"
+                onClick={() => handleSkillClick(skill)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleSkillClick(skill);
+                  }
+                }}
+                role="button"
+                tabIndex={skill === 'Startups' ? 0 : -1}
+                style={{ cursor: skill === 'Startups' ? 'pointer' : 'default' }}
+              >
+                {skill}
+              </span>
+            ))}
+            {/* Second set for seamless loop */}
+            {skills.map((skill, index) => (
+              <span
+                key={`skill-${index}-2`}
+                className="skill-tag"
+                onClick={() => handleSkillClick(skill)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleSkillClick(skill);
+                  }
+                }}
+                role="button"
+                tabIndex={-1}
+                style={{ cursor: skill === 'Startups' ? 'pointer' : 'default' }}
+              >
+                {skill}
+              </span>
+            ))}
+            {/* Third set for ultra-smooth scroll */}
+            {skills.map((skill, index) => (
+              <span
+                key={`skill-${index}-3`}
+                className="skill-tag"
+                onClick={() => handleSkillClick(skill)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleSkillClick(skill);
+                  }
+                }}
+                role="button"
+                tabIndex={-1}
+                style={{ cursor: skill === 'Startups' ? 'pointer' : 'default' }}
+              >
+                {skill}
+              </span>
+            ))}
           </div>
         </div>
       </div>

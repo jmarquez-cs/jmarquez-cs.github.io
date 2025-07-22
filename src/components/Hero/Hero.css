@@ -1,279 +1,472 @@
 .hero {
-  min-height: 100vh;
-  padding: 8rem 0 4rem;
-  background: var(--gradient-primary);
+  /* Account for footer height (~80px) across all screen sizes */
+  min-height: calc(100vh - 80px);
+  /* Add top padding to account for fixed navigation - exact height 69px */
+  padding: calc(69px + 2rem) 2rem 2rem;
   color: var(--rican-white);
   display: flex;
   align-items: center;
   position: relative;
   overflow: hidden;
+  /* Hero section background - independent of WaveBackground */
+  background: linear-gradient(
+    135deg,
+    var(--rican-black) 0%,
+    rgba(0, 20, 40, 0.95) 25%,
+    rgba(20, 30, 60, 0.9) 50%,
+    rgba(30, 40, 80, 0.85) 75%,
+    var(--rican-black) 100%
+  );
+}
+
+/* Add atmospheric overlay for depth */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(151, 240, 229, 0.1) 0%,
+    rgba(197, 132, 246, 0.05) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0; /* Below WaveBackground */
+}
+
+/* Parallax layer styles */
+.hero-background-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  z-index: 1;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.hero-wave-background {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  z-index: 1;
+  pointer-events: none;
+  /* Ensure WaveBackground extends slightly beyond Hero bottom for visibility */
+  transform: translateY(10px);
+}
+
+@media (max-width: 768px) {
+  .hero-wave-background {
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-wave-background {
+    height: 150px;
+  }
 }
 
 .hero-content {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 3rem;
-  align-items: center;
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.hero-tech-swimlane {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 60px;
+  overflow: hidden;
+  z-index: 2;
+  background: transparent;
+  /* Create invisible fade zones for icon opacity calculation */
+  --fade-zone-width: 400px;
+}
+
+.tech-swimlane-track {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  animation: swimlaneScrollSeamless 40s linear infinite;
+  will-change: transform;
+  gap: 1rem;
   padding: 0 2rem;
 }
 
-@media (min-width: 768px) {
-  .hero-content {
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-  }
-}
-
-@media (min-width: 1200px) {
-  .hero-content {
-    gap: 6rem;
-  }
-}
-
-.hero-title {
-  font-size: clamp(var(--text-4xl), 6vw, var(--text-7xl));
-  font-weight: 800;
-  line-height: var(--leading-tight);
-  margin-bottom: 1.5rem;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.hero-subtitle {
-  font-size: clamp(var(--text-lg), 2.5vw, var(--text-xl));
-  line-height: var(--leading-body);
-  margin-bottom: 2.5rem;
-  opacity: 0.95;
-  max-width: 60ch;
-}
-
-.hero-buttons {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.hero-visual {
-  position: relative;
-  height: 200px;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-}
-
-@media (min-width: 768px) {
-  .hero-visual {
-    height: 400px;
-    max-width: none;
-  }
-}
-
-@media (min-width: 1200px) {
-  .hero-visual {
-    height: 500px;
-  }
-}
-
-.floating-card {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 24px;
-  animation: float 3s ease-in-out infinite;
-  box-shadow: 0 8px 20px var(--shadow-medium);
-}
-
-.card-mint {
-  background: var(--mint-600);
-  top: 20%;
-  right: 10%;
-  animation-delay: 0s;
-}
-
-.card-grape {
-  background: var(--grape-600);
-  top: 60%;
-  right: 40%;
-  animation-delay: 1s;
-}
-
-.card-lime {
-  background: var(--lime);
-  top: 40%;
-  right: 70%;
-  animation-delay: 2s;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-25px) rotate(8deg);
-  }
-}
-
-/* Interactive Card Styles */
-.interactive-card {
-  cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.interactive-card::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.4);
-  transform: translate(-50%, -50%);
-  transition:
-    width 0.15s ease,
-    height 0.15s ease,
-    opacity 0.15s ease;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.interactive-card:hover {
-  transform: translateY(-8px) scale(1.05);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-}
-
-.interactive-card:active::before {
-  width: 300px;
-  height: 300px;
+.tech-swimlane-icon {
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
 }
 
-.interactive-card:active {
-  transform: translateY(-4px) scale(1.02);
+.tech-swimlane-icon:hover {
+  transform: scale(1.2) translateY(-4px);
+  z-index: 10;
+  position: relative;
 }
 
-/* Individual card hover effects */
-.card-mint.interactive-card:hover::after {
-  content: '💎';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
+/* Dynamic fade effects based on position - will be controlled by JavaScript */
+.tech-swimlane-icon.fading-in {
+  opacity: 0;
+  animation: fadeIn 1s ease-out forwards;
+}
+
+.tech-swimlane-icon.fading-out {
+  opacity: 1;
+  animation: fadeOut 1s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.8);
+  }
+}
+
+/* Tier-based styling for visual hierarchy - brightened for better visibility */
+.tech-swimlane-icon[data-tier='primary'] {
+  opacity: 1;
+  filter: drop-shadow(0 4px 8px rgba(97, 218, 251, 0.4));
+}
+
+.tech-swimlane-icon[data-tier='secondary'] {
+  opacity: 1;
+  filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.2));
+}
+
+.tech-swimlane-icon[data-tier='accent'] {
+  opacity: 0.95;
+  filter: drop-shadow(0 2px 4px rgba(241, 104, 34, 0.3));
+}
+
+.tech-swimlane-icon[data-tier='ambient'] {
   opacity: 0.9;
-  animation: cardBounce 0.3s ease-out;
 }
 
-.card-grape.interactive-card:hover::after {
-  content: '🍇';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  opacity: 0.9;
-  animation: cardBounce 0.3s ease-out;
+.tech-swimlane-icon[data-tier='discovery'] {
+  opacity: 0.85;
 }
 
-.card-lime.interactive-card:hover::after {
-  content: '⚡';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  opacity: 0.9;
-  animation: cardBounce 0.3s ease-out;
+/* Seamless infinite horizontal scroll animation */
+@keyframes swimlaneScrollSeamless {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
 }
 
-@keyframes cardBounce {
+/* Pause animation on hover for better interaction */
+.hero-tech-swimlane:hover .tech-swimlane-track {
+  animation-play-state: paused;
+}
+
+/* Gentle floating for individual icons on hover */
+@keyframes gentleFloat {
   0%,
   100% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translateY(0px);
   }
   50% {
-    transform: translate(-50%, -50%) scale(1.4);
+    transform: translateY(-6px);
   }
 }
 
-/* Physics animation keyframes */
-@keyframes cardPhysics {
-  0% {
-    transform: translateX(0) translateY(0) rotate(0deg) scale(1);
-  }
+.tech-swimlane-icon:hover {
+  animation: gentleFloat 0.6s ease-in-out;
+}
+
+/* Subtle floating for accent icons */
+@keyframes floatSubtle {
+  0%,
   100% {
-    transform: var(--physics-transform);
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translateY(-5px) rotate(0.5deg) scale(1.02);
+  }
+  66% {
+    transform: translateY(-8px) rotate(-0.5deg) scale(1.01);
   }
 }
 
+/* Ambient background motion */
+@keyframes floatAmbient {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-3px) rotate(0.3deg) scale(1.01);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-0.2deg) scale(1);
+  }
+  75% {
+    transform: translateY(-4px) rotate(0.4deg) scale(1.01);
+  }
+}
+
+/* Discovery icons - slow, mysterious motion */
+@keyframes floatDiscovery {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg) scale(0.95);
+  }
+  20% {
+    transform: translateY(-2px) rotate(0.2deg) scale(0.98);
+  }
+  40% {
+    transform: translateY(-4px) rotate(-0.1deg) scale(1);
+  }
+  60% {
+    transform: translateY(-3px) rotate(0.3deg) scale(0.97);
+  }
+  80% {
+    transform: translateY(-1px) rotate(-0.2deg) scale(0.99);
+  }
+}
+
+/* Responsive swimlane adjustments */
 @media (max-width: 768px) {
+  .hero-tech-swimlane {
+    height: 50px;
+    top: 15%;
+  }
+
   .hero-content {
-    grid-template-columns: 1fr;
-    gap: 3rem;
+    margin-top: 4rem;
+  }
+
+  .tech-swimlane-track {
+    gap: 0.75rem;
+    padding: 0 1rem;
+    animation-duration: 45s; /* Slower to complete full cycle */
+  }
+
+  .tech-swimlane-icon:hover {
+    transform: scale(1.15) translateY(-2px); /* Less dramatic on mobile */
+  }
+
+  /* Hide discovery tier on mobile for performance */
+  .tech-swimlane-icon[data-tier='discovery'] {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-tech-swimlane {
+    height: 45px;
+    top: 12%;
+  }
+
+  .hero-content {
+    margin-top: 3rem;
+  }
+
+  .tech-swimlane-track {
+    gap: 0.5rem;
+    animation-duration: 50s;
+  }
+
+  /* Show only primary and secondary tiers on small mobile */
+  .tech-swimlane-icon[data-tier='ambient'],
+  .tech-swimlane-icon[data-tier='discovery'] {
+    display: none;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .tech-swimlane-track {
+    animation-duration: 120s; /* Slower but not too slow for accessibility */
+  }
+
+  .tech-swimlane-icon:hover {
+    transform: scale(1.05);
+    animation: none;
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3; /* Above WaveBackground and tech layer */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  margin-top: 6rem; /* Space for positioned swimlane */
+}
+
+/* Hero Typography - moved from globals.css for better component isolation */
+.hero-title {
+  font-size: clamp(var(--text-5xl), 8vw, var(--text-8xl));
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tighter);
+  margin-bottom: 1.5rem;
+  color: var(--text-hero);
+  text-shadow: 3px 3px 6px var(--shadow-medium);
+  text-transform: uppercase;
+}
+
+.highlight {
+  background: linear-gradient(45deg, var(--banana), var(--pears));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  position: relative;
+}
+
+.hero-subtitle {
+  font-size: clamp(var(--text-xl), 3vw, var(--text-3xl));
+  font-weight: 500;
+  line-height: var(--leading-relaxed);
+  color: var(--text-hero-secondary);
+  margin-bottom: 1rem;
+  text-shadow: 2px 2px 4px var(--shadow-soft);
+  text-transform: none;
+}
+
+.hero-description {
+  font-size: clamp(var(--text-lg), 2.5vw, var(--text-xl));
+  color: var(--text-hero);
+  margin-bottom: 2rem;
+  font-weight: 400;
+  text-shadow: 1px 1px 3px var(--shadow-soft);
+  line-height: var(--leading-body);
+  max-width: 60ch;
+}
+
+/* Mobile Responsive - Optimized for maximum content space */
+@media (max-width: 768px) {
+  .hero {
+    /* Match Navigation container padding of 1rem and account for footer */
+    min-height: calc(100vh - 70px);
+    padding: calc(69px + 0.5rem) 1rem 1rem;
+  }
+
+  .hero-content {
     text-align: center;
+    padding: 0;
+    margin: 0;
   }
 
-  .hero-visual {
-    height: 200px;
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
-  .floating-card {
-    width: 80px;
-    height: 80px;
+  .hero-title {
+    margin-bottom: 0.75rem;
   }
 
-  .easter-egg-card:hover::after {
-    font-size: 1.5rem;
+  .hero-subtitle {
+    margin-bottom: 0.75rem;
   }
 }
 
 @media (max-width: 480px) {
   .hero {
-    padding: 3rem 0.75rem 1.5rem;
-    min-height: 80vh;
+    /* Match Navigation container padding of 0.5rem at this breakpoint */
+    min-height: calc(100vh - 65px);
+    padding: calc(69px + 0.25rem) 0.5rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 430px) {
+  .hero {
+    /* Match Navigation container padding of 0.5rem */
+    min-height: calc(100vh - 65px);
+    padding: calc(69px + 0.25rem) 0.5rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .hero {
+    /* Match Navigation container padding of 0.25rem */
+    min-height: calc(100vh - 60px);
+    padding: calc(69px + 0.125rem) 0.25rem 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero-content {
-    gap: 1.5rem;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
   }
 
-  .hero-visual {
-    height: 120px;
-  }
-
-  .floating-card {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   .hero-title {
-    font-size: clamp(var(--text-3xl), 7vw, var(--text-5xl));
-    margin-bottom: 0.75rem;
+    font-size: clamp(var(--text-3xl), 8vw, var(--text-5xl));
+    margin-bottom: 0.5rem;
+    text-align: center;
+    line-height: 1.1;
   }
 
   .hero-subtitle {
-    font-size: var(--text-lg);
-    margin-bottom: 1rem;
-  }
-
-  .hero-description {
-    font-size: var(--text-base);
-    margin-bottom: 1.5rem;
-    max-width: 50ch;
-  }
-
-  .hero-cta {
-    gap: 0.75rem;
-    flex-direction: column;
+    font-size: clamp(var(--text-lg), 4vw, var(--text-xl));
+    margin-bottom: 0.5rem;
+    text-align: center;
   }
 
   .btn {
@@ -284,52 +477,63 @@
   }
 }
 
-/* Ultra-small screens (iPhone SE, small Android) */
+/* Ultra-small screens (iPhone SE 375px and below) */
 @media (max-width: 375px) {
   .hero {
-    padding: 2.5rem 0.5rem 1rem;
-    min-height: 75vh;
+    /* Account for thinner navigation (0.5rem padding = ~53px total height) */
+    /* Adjust height to fit above footer - subtract footer height (~55px) */
+    min-height: calc(100vh - 55px);
+    padding: calc(53px + 0.125rem) 0.25rem 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .hero-content {
-    gap: 1rem;
+    text-align: center;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
   }
 
-  .hero-visual {
-    height: 100px;
-  }
-
-  .floating-card {
-    width: 45px;
-    height: 45px;
-    border-radius: 8px;
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
   }
 
   .hero-title {
-    font-size: clamp(var(--text-2xl), 6vw, var(--text-4xl));
-    margin-bottom: 0.5rem;
-    line-height: 1.1;
+    font-size: clamp(var(--text-2xl), 7vw, var(--text-4xl));
+    margin-bottom: 0.375rem;
+    line-height: 1.05;
+    text-align: center;
   }
 
   .hero-subtitle {
-    font-size: var(--text-base);
-    margin-bottom: 0.75rem;
-  }
-
-  .hero-description {
-    font-size: var(--text-sm);
-    margin-bottom: 1.25rem;
-    max-width: 45ch;
+    font-size: clamp(var(--text-base), 3.5vw, var(--text-lg));
+    margin-bottom: 0.375rem;
+    text-align: center;
   }
 
   .btn {
+    width: 100%;
+    max-width: 260px;
     padding: 0.75rem 1rem;
     font-size: var(--text-xs);
   }
+}
 
-  .card-mint.interactive-card:hover::after,
-  .card-grape.interactive-card:hover::after,
-  .card-lime.interactive-card:hover::after {
-    font-size: 1.25rem;
-  }
+.tech-swimlane-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  opacity: 1;
 }

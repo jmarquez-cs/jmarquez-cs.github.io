@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../hooks/useTheme';
 import { useBundleAnalyzer, usePerformanceBudget } from '../../hooks/usePerformanceMonitor';
@@ -120,7 +120,9 @@ const BudgetStatus = React.memo(({ budgetStatus }) => (
     {!budgetStatus.passed &&
       budgetStatus.warnings?.slice(0, 3).map((warning, index) => (
         <div key={index} className="budget-violation">
-          <span className="violation-message">{warning}</span>
+          <span className="violation-message">
+            {typeof warning === 'string' ? warning : warning.message}
+          </span>
         </div>
       ))}
   </div>
@@ -255,14 +257,30 @@ RecommendationsTab.propTypes = {
 };
 
 // Main component - now focused on state and layout
-const BundleAnalyzerComponent = ({ isVisible = true }) => {
+const BundleAnalyzerComponent = ({ isVisible: propIsVisible = true }) => {
   const { totalSize, compressedSize, chunks, dependencies, cacheEfficiency } = useBundleAnalyzer();
   const budgetStatus = usePerformanceBudget();
   const { theme } = useTheme();
-  const { hideBundleAnalyzer, toggleVisibility } = useBundleAnalyzerVisibility();
+  const { isVisible, toggleVisibility } = useBundleAnalyzerVisibility();
   const [activeTab, setActiveTab] = useState('overview');
 
-  if (process.env.NODE_ENV !== 'development' || !isVisible) {
+  // Track if analyzer has been closed this session to hide toggle button
+  const [hasBeenClosed, setHasBeenClosed] = useState(() => {
+    const stored = localStorage.getItem('bundleAnalyzerClosedThisSession');
+    return stored === 'true';
+  });
+
+  // Clear the closed session flag on component mount (fresh page load)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('bundleAnalyzerClosedThisSession');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  if (process.env.NODE_ENV !== 'development') {
     return null;
   }
 
@@ -331,9 +349,22 @@ const BundleAnalyzerComponent = ({ isVisible = true }) => {
 
   const { grade, color: gradeColor } = getScoreGrade(overallScore);
 
+  const handleToggle = () => {
+    if (isVisible) {
+      setHasBeenClosed(true);
+      localStorage.setItem('bundleAnalyzerClosedThisSession', 'true');
+    }
+    toggleVisibility();
+  };
+
+  // Don't render anything if it's been closed this session
+  if (hasBeenClosed) {
+    return null;
+  }
+
   return (
     <>
-      <BundleAnalyzerToggle isVisible={isVisible} onToggle={toggleVisibility} />
+      <BundleAnalyzerToggle isVisible={isVisible} onToggle={handleToggle} />
       {isVisible && (
         <div className={`bundle-analyzer ${theme}`}>
           <div className="bundle-analyzer-header">
@@ -346,6 +377,13 @@ const BundleAnalyzerComponent = ({ isVisible = true }) => {
                     {overallScore}/100 ({grade})
                   </span>
                 </div>
+                <button
+                  className="refresh-button"
+                  onClick={() => window.location.reload()}
+                  title="Refresh data"
+                >
+                  🔄
+                </button>
               </div>
             </div>
           </div>

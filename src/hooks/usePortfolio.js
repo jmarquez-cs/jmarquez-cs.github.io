@@ -1,9 +1,11 @@
 import { useMemo, useCallback, useState, useEffect } from 'react';
 import { portfolioSchema, portfolioSelectors } from '../data/portfolioData';
+import { professionalDisciplines, disciplineUtils } from '../data/professionalDisciplines';
 import { useLocalStorage } from './useLocalStorage';
 
 export const usePortfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedDiscipline, setSelectedDiscipline] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Enhanced user preferences with localStorage
@@ -17,6 +19,8 @@ export const usePortfolio = () => {
       itemsPerPage: 12,
       lastViewedProject: null,
       favoriteProjects: [],
+      disciplineView: false, // Show discipline-based view
+      selectedDisciplines: [], // Filter by specific disciplines
     },
     {
       validator: (value) =>
@@ -27,7 +31,9 @@ export const usePortfolio = () => {
         typeof value.showDescriptions === 'boolean' &&
         Number.isInteger(value.itemsPerPage) &&
         value.itemsPerPage > 0 &&
-        Array.isArray(value.favoriteProjects),
+        Array.isArray(value.favoriteProjects) &&
+        typeof value.disciplineView === 'boolean' &&
+        Array.isArray(value.selectedDisciplines),
     },
   );
 
@@ -46,6 +52,11 @@ export const usePortfolio = () => {
       selectedCategory === 'all'
         ? allProjects
         : portfolioSelectors.getProjectsByCategory(portfolioSchema, selectedCategory);
+
+    // Apply discipline filter
+    if (selectedDiscipline !== 'all') {
+      projects = disciplineUtils.getProjectsByDiscipline(selectedDiscipline, portfolioSchema);
+    }
 
     // Apply search filter
     if (searchTerm) {
@@ -90,6 +101,7 @@ export const usePortfolio = () => {
   }, [
     allProjects,
     selectedCategory,
+    selectedDiscipline,
     searchTerm,
     portfolioPreferences.sortBy,
     portfolioPreferences.sortOrder,
@@ -110,7 +122,13 @@ export const usePortfolio = () => {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedCategory, searchTerm, portfolioPreferences.sortBy, portfolioPreferences.sortOrder]);
+  }, [
+    selectedCategory,
+    selectedDiscipline,
+    searchTerm,
+    portfolioPreferences.sortBy,
+    portfolioPreferences.sortOrder,
+  ]);
 
   const getProjectTechnologies = useCallback(
     (projectId) => portfolioSelectors.getProjectTechnologies(portfolioSchema, projectId),
@@ -126,6 +144,8 @@ export const usePortfolio = () => {
     () => portfolioSchema.technologies.allIds.map((id) => portfolioSchema.technologies.byId[id]),
     [],
   );
+
+  const disciplines = useMemo(() => disciplineUtils.getAllDisciplines(), []);
 
   // Enhanced actions
   const toggleFavorite = useCallback(
@@ -169,9 +189,11 @@ export const usePortfolio = () => {
     paginatedProjects,
     categories,
     technologies,
+    disciplines,
 
     // State
     selectedCategory,
+    selectedDiscipline,
     searchTerm,
     currentPage,
     totalPages,
@@ -180,12 +202,13 @@ export const usePortfolio = () => {
     // Enhanced state queries
     hasResults: processedProjects.length > 0,
     totalResults: processedProjects.length,
-    isFiltered: selectedCategory !== 'all' || searchTerm !== '',
+    isFiltered: selectedCategory !== 'all' || selectedDiscipline !== 'all' || searchTerm !== '',
     canGoNext: currentPage < totalPages,
     canGoPrevious: currentPage > 1,
 
     // Actions
     setSelectedCategory,
+    setSelectedDiscipline,
     setSearchTerm,
     setCurrentPage,
     getProjectTechnologies,
@@ -215,6 +238,25 @@ export const usePortfolio = () => {
     isFavorite: useCallback(
       (projectId) => portfolioPreferences.favoriteProjects.includes(projectId),
       [portfolioPreferences.favoriteProjects],
+    ),
+
+    // Discipline selectors
+    getDisciplineById: useCallback(
+      (disciplineId) => disciplineUtils.getDisciplineById(disciplineId),
+      [],
+    ),
+    getDisciplineTechnologies: useCallback(
+      (disciplineId) => disciplineUtils.getDisciplineTechnologies(disciplineId, portfolioSchema),
+      [],
+    ),
+    getDisciplineProficiency: useCallback(
+      (disciplineId) =>
+        disciplineUtils.calculateDisciplineProficiency(disciplineId, portfolioSchema),
+      [],
+    ),
+    getProjectsByDiscipline: useCallback(
+      (disciplineId) => disciplineUtils.getProjectsByDiscipline(disciplineId, portfolioSchema),
+      [],
     ),
   };
 };

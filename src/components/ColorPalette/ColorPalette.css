@@ -1,0 +1,530 @@
+.color-palette-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.palette-showcase {
+  text-align: center;
+  padding: 3rem;
+  background: var(--gradient-primary);
+  border-radius: 24px;
+  color: var(--rican-white);
+  box-shadow: 0 20px 40px var(--shadow-medium);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.palette-showcase::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.palette-showcase:hover::before {
+  transform: translateX(100%);
+}
+
+.palette-showcase:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 25px 50px var(--shadow-strong);
+}
+
+.palette-showcase h3 {
+  font-family: var(--font-primary);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-tight);
+}
+
+.palette-showcase p {
+  opacity: 0.95;
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+}
+
+.color-info-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 2rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.color-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.color-preview:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.color-emoji {
+  font-size: 2rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.color-details {
+  text-align: left;
+  flex: 1;
+  max-width: 300px;
+}
+
+.color-details h4 {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--rican-white);
+}
+
+.css-values {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.css-value {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.css-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+.css-value code {
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--rican-white);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: var(--text-sm);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.css-value code:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateX(4px);
+}
+
+.css-value code.copied {
+  background: var(--lime);
+  color: var(--rican-black);
+  border-color: var(--lime);
+  animation: pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.copy-notification {
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--lime);
+  color: var(--rican-black);
+  border-radius: 20px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-align: center;
+  animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.color-flow {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.flow-card {
+  animation: cardReveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.flow-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.flow-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.flow-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.flow-card:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.flow-card:nth-child(5) {
+  animation-delay: 0.5s;
+}
+.flow-card:nth-child(6) {
+  animation-delay: 0.6s;
+}
+
+@media (min-width: 480px) {
+  .color-flow {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .color-flow {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-flow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+.flow-card {
+  background: var(--bg-secondary);
+  padding: 2.5rem 2rem;
+  border-radius: 24px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 3px solid transparent;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.flow-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flow-card:hover::before {
+  transform: translateX(100%);
+}
+
+.flow-card:hover {
+  transform: translateY(-8px) scale(1.05);
+  border-color: var(--mint-700);
+  box-shadow:
+    0 15px 35px var(--shadow-medium),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  filter: brightness(1.1) saturate(1.2);
+}
+
+.flow-card:hover .flow-name {
+  text-shadow: 0 0 8px currentColor;
+}
+
+.flow-card:focus {
+  outline: 3px solid var(--text-accent);
+  outline-offset: 3px;
+  border-color: var(--text-accent);
+}
+
+.flow-card:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.flow-card:focus-visible {
+  outline: 3px solid var(--text-accent);
+  outline-offset: 3px;
+  border-color: var(--text-accent);
+}
+
+.flow-card:active {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.flow-emoji {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flow-card:hover .flow-emoji {
+  transform: scale(1.2) rotate(10deg);
+}
+
+.flow-name {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: var(--text-base);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flow-value {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: var(--text-xs);
+  font-family: 'Monaco', 'Menlo', monospace;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flow-card:hover .flow-value {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-primary);
+}
+
+/* Dynamic color application using CSS variables */
+.flow-card[style*='--lime'] {
+  color: var(--rican-black);
+}
+
+.flow-card[style*='--lime'] .flow-name,
+.flow-card[style*='--lime'] .flow-value {
+  color: var(--rican-black);
+}
+
+.flow-card[style*='--pears'] {
+  color: var(--rican-black);
+}
+
+.flow-card[style*='--pears'] .flow-name,
+.flow-card[style*='--pears'] .flow-value {
+  color: var(--rican-black);
+}
+
+.flow-card[style*='--guava'] {
+  color: var(--rican-white);
+}
+
+.flow-card[style*='--guava'] .flow-name,
+.flow-card[style*='--guava'] .flow-value {
+  color: var(--rican-white);
+}
+
+.flow-card[style*='--mandarin'] {
+  color: var(--rican-white);
+}
+
+.flow-card[style*='--mandarin'] .flow-name,
+.flow-card[style*='--mandarin'] .flow-value {
+  color: var(--rican-white);
+}
+
+.flow-card[style*='--blueberry'] {
+  color: var(--rican-white);
+}
+
+.flow-card[style*='--blueberry'] .flow-name,
+.flow-card[style*='--blueberry'] .flow-value {
+  color: var(--rican-white);
+}
+
+.flow-card[style*='--banana'] {
+  color: var(--rican-black);
+}
+
+.flow-card[style*='--banana'] .flow-name,
+.flow-card[style*='--banana'] .flow-value {
+  color: var(--rican-black);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .color-palette-container {
+    gap: 2rem;
+  }
+
+  .palette-showcase {
+    padding: 2rem;
+  }
+
+  .color-info-display {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .color-details {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .color-flow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .flow-card {
+    padding: 2rem 1rem;
+  }
+
+  .flow-emoji {
+    font-size: 2rem;
+  }
+
+  .flow-name {
+    font-size: var(--text-sm);
+  }
+
+  .flow-value {
+    font-size: 0.65rem;
+  }
+
+  .palette-showcase {
+    padding: 1.5rem;
+  }
+
+  .palette-showcase h3 {
+    font-size: var(--text-xl);
+  }
+
+  .palette-showcase p {
+    font-size: var(--text-base);
+  }
+
+  .color-info-display {
+    padding: 1.5rem;
+  }
+
+  .color-preview {
+    width: 60px;
+    height: 60px;
+  }
+
+  .color-emoji {
+    font-size: 1.5rem;
+  }
+}
+
+/* Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(20px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes cardReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .flow-card,
+  .palette-showcase,
+  .color-info-display,
+  .copy-notification,
+  .css-value code {
+    transition: none;
+    animation: none;
+  }
+
+  .flow-card::before,
+  .palette-showcase::before {
+    display: none;
+  }
+
+  .flow-card {
+    opacity: 1;
+    transform: none;
+  }
+
+  .flow-card:hover {
+    transform: none;
+  }
+
+  .flow-card:hover .flow-emoji {
+    transform: none;
+  }
+
+  .flow-card:hover .flow-name {
+    text-shadow: none;
+  }
+}

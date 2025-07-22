@@ -195,8 +195,10 @@ const PerformanceDashboard = ({ componentName = 'Dashboard', isVisible = true })
                 </div>
                 {budgetData.violations.slice(0, 3).map((violation, index) => (
                   <div key={`violation-${violation.type}-${index}`} className="budget-violation">
-                    <span className="violation-type">{violation.type.replace('_', ' ')}</span>
-                    <span className="violation-message">{violation.message}</span>
+                    <span className="violation-type">
+                      {String(violation.type).replace('_', ' ')}
+                    </span>
+                    <span className="violation-message">{String(violation.message)}</span>
                   </div>
                 ))}
               </div>

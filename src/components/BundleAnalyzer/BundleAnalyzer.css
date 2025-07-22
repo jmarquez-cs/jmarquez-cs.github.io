@@ -294,6 +294,26 @@
   transform: scale(1.1);
 }
 
+.refresh-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: var(--primary-text-color);
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.refresh-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
 /* Tabs styling */
 .bundle-analyzer-tabs {
   display: flex;

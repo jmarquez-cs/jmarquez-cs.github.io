@@ -1,12 +1,12 @@
 # Combined React Architecture Principles
 
-This guide consolidates core React architecture principles and hook-specific best practices for React v18.x, organized from higher-order concerns (architecture, state management, and rendering) to lower-order concerns (specific hook usage and optimizations). Follow React's declarative paradigm.
-
 Check these again as you go:
 
-Interface contracts (what components expect)
-Implementation reality (what's actually provided)
+Interface contracts (what components expect)  
+Implementation reality (what's actually provided)  
 Method signatures (how functions are called vs defined)
+
+This guide consolidates core React architecture principles and hook-specific best practices for React v18.x, organized from higher-order concerns (architecture, state management, and rendering) to lower-order concerns (specific hook usage and optimizations).
 
 In conjunction to following React's declarative paradigm, ensure a loose coupling software design principle.
 

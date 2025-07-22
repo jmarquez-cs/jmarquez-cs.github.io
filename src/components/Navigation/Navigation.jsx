@@ -15,7 +15,7 @@ export const Navigation = React.memo(() => {
   const handleHomeClick = useCallback(() => scrollToSection('hero'), [scrollToSection]);
   const handleAboutClick = useCallback(() => scrollToSection('about'), [scrollToSection]);
   const handlePortfolioClick = useCallback(() => scrollToSection('portfolio'), [scrollToSection]);
-  const handleContactClick = useCallback(() => scrollToSection('contact'), [scrollToSection]);
+  const handlePaletteClick = useCallback(() => scrollToSection('skills'), [scrollToSection]);
 
   return (
     <nav className="navbar">
@@ -48,10 +48,10 @@ export const Navigation = React.memo(() => {
           <li>
             <button
               className="nav-link"
-              onClick={handleContactClick}
-              aria-label="Go to contact section"
+              onClick={handlePaletteClick}
+              aria-label="Go to color palette section"
             >
-              Contact
+              Tech
             </button>
           </li>
         </ul>

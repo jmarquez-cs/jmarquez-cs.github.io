@@ -34,23 +34,20 @@ export const usePerformanceMonitor = (componentName) => {
     return Math.round((hits / cacheEntries.length) * 100);
   }, []);
 
-  const addAlert = useCallback(
-    (type, message, data = null) => {
-      const alert = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Ensure unique ID
-        type,
-        message,
-        data,
-        timestamp: Date.now(),
-      };
+  const addAlert = useCallback((type, message, data = null) => {
+    const alert = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Ensure unique ID
+      type,
+      message,
+      data,
+      timestamp: Date.now(),
+    };
 
-      setAlerts((prev) => {
-        const newAlerts = [alert, ...prev];
-        return newAlerts.slice(0, 10); // Keep last 10 alerts
-      });
-    },
-    [componentName],
-  );
+    setAlerts((prev) => {
+      const newAlerts = [alert, ...prev];
+      return newAlerts.slice(0, 10); // Keep last 10 alerts
+    });
+  }, []);
 
   // Enhanced Performance Observer for comprehensive metrics
   useEffect(() => {
@@ -504,7 +501,7 @@ export const usePerformanceBudget = () => {
         severity: 'error',
         current: largestChunk.size,
         budget: budgetStatus.budgets.chunkSize,
-        chunk: largestChunk.name,
+        chunk: largestChunk.name || 'unknown',
       });
       passed = false;
       score -= 15;
