@@ -9,6 +9,7 @@ const AboutComponent = () => {
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const imageRef = useRef(null);
+  const aboutRef = useRef(null);
 
   const skills = [
     'Linux System Administration',
@@ -75,25 +76,18 @@ const AboutComponent = () => {
   }, []);
 
   return (
-    <section id="about" className="section">
+    <section id="about" className="section" ref={aboutRef}>
       <div className="container">
         <h2 className="section-title">ABOUT</h2>
         <div className="about-content">
           <div className="about-text">
             <p>
-              As a Fractional CTO and DevSecOps Engineer, I specialize in blockchain technologies,
-              distributed ledger systems, and cloud infrastructure. I help startups and enterprises
-              implement secure, scalable solutions using cutting-edge technologies.
+              As a Fractional CTO, I help startups and small business enterprises implement secure,
+              scalable solutions using cutting-edge technologies.
             </p>
             <p>
-              My expertise includes Hyperledger Indy, Hedera Hashgraph, Ethereum, and Lightning
-              Network, combined with enterprise-grade DevSecOps practices using GCP, AWS, and modern
-              CI/CD pipelines. I&apos;m fluent in both English and Spanish (native).
-            </p>
-            <p>
-              I hold certifications in Cloud Digital Leader and Hyperledger blockchain development,
-              with extensive experience at companies like Cryptstax, Fathom PBC, Object Computing,
-              and leading blockchain initiatives that have secured millions in funding.
+              My experience allows me to build and scale a product from 0 to 1 with with development
+              pipelines, security, and standard operating procedures.
             </p>
           </div>
           <div className="profile-image" style={{ position: 'relative' }}>
@@ -132,6 +126,11 @@ const AboutComponent = () => {
                 }}
               />
             </button>
+            <MatrixRain
+              isActive={showMatrixRain}
+              onComplete={handleMatrixComplete}
+              targetElement={imageRef.current}
+            />
           </div>
         </div>
 
@@ -195,11 +194,6 @@ const AboutComponent = () => {
           </div>
         </div>
       </div>
-      <MatrixRain
-        isActive={showMatrixRain}
-        onComplete={handleMatrixComplete}
-        targetElement={imageRef.current}
-      />
     </section>
   );
 };

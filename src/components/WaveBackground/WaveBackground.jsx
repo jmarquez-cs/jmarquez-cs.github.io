@@ -13,7 +13,16 @@ const WaveBackgroundComponent = () => {
     if (!canvas) return;
 
     canvas.width = window.innerWidth;
-    canvas.height = 300;
+
+    // Match the responsive heights from Hero.css + amplitude padding
+    // Adding 80px (2x amplitude) to prevent wave cutoff at top
+    if (window.innerWidth <= 480) {
+      canvas.height = 150 + 80; // Mobile
+    } else if (window.innerWidth <= 768) {
+      canvas.height = 200 + 80; // Tablet
+    } else {
+      canvas.height = 300 + 80; // Desktop
+    }
   }, []);
 
   // Main animation function - memoized with stable dependencies
@@ -203,9 +212,18 @@ const WaveBackgroundComponent = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Set initial canvas size - exactly like original
+    // Set initial canvas size with responsive height
     canvas.width = window.innerWidth;
-    canvas.height = 300;
+
+    // Match the responsive heights from Hero.css + amplitude padding
+    // Adding 80px (2x amplitude) to prevent wave cutoff at top
+    if (window.innerWidth <= 480) {
+      canvas.height = 150 + 80; // Mobile
+    } else if (window.innerWidth <= 768) {
+      canvas.height = 200 + 80; // Tablet
+    } else {
+      canvas.height = 300 + 80; // Desktop
+    }
 
     // Reset frame tracking
     frameCountRef.current = 0;

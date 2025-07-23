@@ -27,7 +27,7 @@ const MatrixRainComponent = ({ isActive, onComplete, targetElement }) => {
       'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01234567890123456789';
     const charArray = chars.split('');
 
-    const fontSize = 10;
+    const fontSize = 5;
     const columns = Math.floor(canvas.width / fontSize);
 
     // Initialize drops
@@ -123,9 +123,10 @@ const MatrixRainComponent = ({ isActive, onComplete, targetElement }) => {
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        zIndex: 1,
+        zIndex: 2,
         background: 'transparent',
-        borderRadius: '4px',
+        borderRadius: '24px',
+        overflow: 'hidden',
       }}
     />
   );

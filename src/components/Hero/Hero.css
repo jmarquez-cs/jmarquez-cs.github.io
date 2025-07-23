@@ -1,13 +1,15 @@
 .hero {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
   /* Account for footer height (~80px) across all screen sizes */
-  min-height: calc(100vh - 80px);
   /* Add top padding to account for fixed navigation - exact height 69px */
   padding: calc(69px + 2rem) 2rem 2rem;
   color: var(--rican-white);
-  display: flex;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
   /* Hero section background - independent of WaveBackground */
   background: linear-gradient(
     135deg,

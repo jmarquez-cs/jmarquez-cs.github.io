@@ -29,9 +29,7 @@ const SkillsRadar = ({ portfolioData, animated = true, showLegend = true }) => {
       return;
     }
 
-    const labels = technologyExperience.map(
-      (tech) => `${tech.name || 'Unknown'} ${tech.years || 0}y`,
-    );
+    const labels = technologyExperience.map((tech) => tech.name || 'Unknown');
     const data = technologyExperience.map((tech) => tech.years || 0);
 
     const ctx = canvasRef.current.getContext('2d');

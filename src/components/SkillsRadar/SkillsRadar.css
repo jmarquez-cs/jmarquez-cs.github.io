@@ -1,45 +1,86 @@
+/* Skills Radar Section Viewport Heights - matching Hero, About, and Portfolio sections */
+.skills-radar-section {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-4) 0;
+  width: 100%;
+}
+
 .skills-radar-container {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100%;
+  max-width: 900px;
+  height: 500px;
   padding: 20px;
-  min-height: 600px;
-  margin-top: var(--space-8);
+  margin-top: var(--space-6);
 }
 
 .skills-radar-chart {
-  max-width: 800px;
   width: 100%;
   height: 100%;
+  max-width: 800px;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
+/* Desktop viewport height adjustments */
+@media (min-width: 1024px) {
+  .skills-radar-section {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--space-6) 0;
+  }
+
   .skills-radar-container {
+    height: 600px;
+    max-width: 1000px;
+  }
+}
+
+/* Tablet viewport height adjustments */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .skills-radar-section {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--space-5) 0;
+  }
+
+  .skills-radar-container {
+    height: 550px;
+    max-width: 900px;
+    padding: 15px;
+  }
+}
+
+/* Mobile viewport height adjustments */
+@media (max-width: 767px) {
+  .skills-radar-section {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--space-4) 0;
+  }
+
+  .skills-radar-container {
+    height: 400px;
     padding: 10px;
-    min-height: 400px;
-    margin-top: var(--space-6);
-  }
-
-  .skills-radar-chart {
-    max-width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .skills-radar-container {
-    padding: 5px;
-    min-height: 300px;
     margin-top: var(--space-4);
   }
 }
 
-@media (max-width: 375px) {
+@media (max-width: 480px) {
+  .skills-radar-section {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--space-3) 0;
+  }
+
   .skills-radar-container {
+    height: 350px;
     padding: 5px;
-    min-height: 250px;
     margin-top: var(--space-3);
   }
 }

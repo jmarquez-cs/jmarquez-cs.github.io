@@ -8,7 +8,27 @@ export const Navigation = React.memo(() => {
   const scrollToSection = useCallback((sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+      const navbar = document.querySelector('.navbar');
+      const navbarHeight = navbar ? navbar.offsetHeight : 70; // fallback to 70px
+      const elementPosition = element.offsetTop;
+      const viewportHeight = window.innerHeight;
+      const elementHeight = element.offsetHeight;
+
+      // Calculate offset to center the section in viewport
+      let offsetPosition;
+      if (elementHeight < viewportHeight - navbarHeight) {
+        // If section is smaller than viewport, center it
+        offsetPosition =
+          elementPosition - navbarHeight - (viewportHeight - navbarHeight - elementHeight) / 2;
+      } else {
+        // If section is larger than viewport, just offset by navbar height
+        offsetPosition = elementPosition - navbarHeight;
+      }
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: 'smooth',
+      });
     }
   }, []);
 

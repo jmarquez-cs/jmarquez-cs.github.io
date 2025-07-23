@@ -1,0 +1,323 @@
+.timeline-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  /* Prevent any scrolling */
+  overflow: hidden;
+  touch-action: none;
+}
+
+.timeline-container {
+  width: 100%;
+  padding: 2rem 0;
+  overflow: hidden;
+  position: relative;
+  z-index: 50;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+  /* Prevent all scrolling */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: none;
+  /* Fade edges for infinite appearance using theme-aware colors */
+  mask: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--text-primary) 10%,
+    var(--text-primary) 90%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--text-primary) 10%,
+    var(--text-primary) 90%,
+    transparent 100%
+  );
+}
+
+.timeline-container::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+.timeline-container:focus {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 4px;
+}
+
+.timeline-scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  position: relative;
+  gap: 2rem;
+  width: 100%;
+}
+
+.timeline-scroll::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--text-accent);
+  transform: translateY(-50%);
+  z-index: 51;
+  opacity: 0.6;
+}
+
+.timeline-center-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 40px;
+  background: var(--text-accent);
+  border-radius: 2px;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.8;
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.timeline-section {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  position: relative;
+  z-index: 52;
+  flex-shrink: 0;
+  padding: 0.5rem;
+  user-select: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  opacity: 0.5;
+}
+
+.timeline-section:hover {
+  transform: translateY(-3px) scale(1.05);
+  opacity: 0.8;
+}
+
+.timeline-section.center {
+  transform: translateY(-6px) scale(1.15);
+  opacity: 1;
+}
+
+.timeline-section.center .timeline-dot {
+  background: var(--text-accent);
+  transform: scale(1.4);
+  box-shadow: 0 6px 16px var(--shadow-medium);
+  border-color: var(--bg-primary);
+}
+
+.timeline-section.center .timeline-year-hidden {
+  opacity: 1;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.timeline-section:hover .timeline-dot {
+  background: var(--text-accent);
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px var(--shadow-soft);
+  border-color: var(--bg-primary);
+}
+
+.timeline-section:hover .timeline-year-hidden {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  border: 2px solid var(--bg-primary);
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 53;
+  opacity: 0.7;
+}
+
+.timeline-dot:hover {
+  transform: scale(1.2);
+  background: var(--text-accent);
+  opacity: 1;
+}
+
+.timeline-year-hidden {
+  font-size: 0.875rem;
+  color: transparent;
+  font-weight: 500;
+  text-align: center;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-secondary);
+}
+
+.timeline-section.center .timeline-year-hidden {
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+/* Touch zones for left/right navigation */
+.timeline-nav-zone {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 70;
+  cursor: pointer;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+.timeline-nav-zone.left {
+  left: 0;
+  cursor: w-resize;
+}
+
+.timeline-nav-zone.right {
+  right: 0;
+  cursor: e-resize;
+}
+
+.timeline-nav-zone:hover {
+  background: var(--shadow-soft);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .timeline-container {
+    padding: 1rem 0;
+  }
+
+  .timeline-scroll {
+    height: 60px;
+    padding: 0 40vw;
+    gap: 1.5rem;
+  }
+
+  .timeline-section {
+    min-width: 80px;
+    padding: 0.25rem;
+  }
+
+  .timeline-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .timeline-center-indicator {
+    height: 30px;
+    width: 3px;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .timeline-container {
+    padding: 0.75rem 0;
+  }
+
+  .timeline-scroll {
+    gap: 1rem;
+    padding: 0 35vw;
+  }
+
+  .timeline-section {
+    min-width: 60px;
+  }
+}
+
+/* Prevent scrolling on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .timeline-container {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .timeline-nav-zone {
+    /* Make touch zones more prominent on mobile */
+    width: 45%;
+  }
+
+  .timeline-nav-zone.left {
+    left: 5%;
+  }
+
+  .timeline-nav-zone.right {
+    right: 5%;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .timeline-container:focus {
+    outline: 3px solid var(--text-primary);
+    outline-offset: 2px;
+  }
+
+  .timeline-scroll::before {
+    height: 3px;
+    opacity: 1;
+  }
+
+  .timeline-center-indicator {
+    width: 6px;
+    opacity: 1;
+    border: 2px solid var(--bg-primary);
+  }
+
+  .timeline-dot {
+    border: 3px solid var(--text-primary);
+    background: var(--bg-primary);
+  }
+
+  .timeline-section.center .timeline-dot,
+  .timeline-section:hover .timeline-dot {
+    background: var(--text-primary);
+    border-color: var(--bg-primary);
+  }
+
+  .timeline-year-hidden {
+    text-shadow: 1px 1px 2px var(--shadow);
+  }
+
+  .timeline-nav-zone:hover {
+    background: var(--shadow-medium);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .timeline-container {
+    scroll-behavior: auto;
+  }
+
+  .timeline-section,
+  .timeline-dot,
+  .nav-dot {
+    transition: none;
+  }
+}
