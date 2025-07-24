@@ -273,22 +273,26 @@ export const portfolioSelectors = {
   getTechnologyExperience: (data) => {
     // Sample technology experience data matching original Radar.html
     return [
-      { id: 'bash', name: 'Bash', years: 7.3 },
-      { id: 'gcp', name: 'GCP', years: 5.8 },
-      { id: 'aws', name: 'AWS', years: 7.2 },
-      { id: 'terraform', name: 'Terraform', years: 6.9 },
-      { id: 'docker', name: 'Docker', years: 7.3 },
-      { id: 'digitalocean', name: 'Digital Ocean', years: 5.2 },
-      { id: 'github', name: 'GitHub', years: 4.6 },
-      { id: 'golang', name: 'Go', years: 7.3 },
-      { id: 'nodejs', name: 'Node.js', years: 9.4 },
-      { id: 'javascript', name: 'JavaScript', years: 2.9 },
-      { id: 'react', name: 'React', years: 6 },
       { id: 'elasticsearch', name: 'Opensearch', years: 1.9 },
-      { id: 'postgresql', name: 'PostgreSQL/MySQL', years: 2.3 },
+      { id: 'nodejs', name: 'Node.js', years: 9.4 },
+      { id: 'postgresql', name: 'SQL', years: 2.3 },
+      { id: 'bash', name: 'Bash', years: 7.3 },
+      { id: 'javascript', name: 'JavaScript', years: 2.9 },
+      { id: 'docker', name: 'Docker', years: 7.3 },
       { id: 'kubernetes', name: 'Kubernetes', years: 2.9 },
-      { id: 'nginx', name: 'Nginx', years: 3.5 },
       { id: 'blockchain', name: 'Blockchain', years: 7.3 },
+      { id: 'nginx', name: 'Nginx', years: 3.5 },
+      { id: 'aws', name: 'AWS', years: 7.2 },
+      { id: 'github', name: 'GitHub', years: 4.6 },
+      { id: 'terraform', name: 'Terraform', years: 6.9 },
+      { id: 'digitalocean', name: 'Digital Ocean', years: 5.2 },
+      { id: 'react', name: 'React', years: 6 },
+      { id: 'gcp', name: 'GCP', years: 5.8 },
+      { id: 'golang', name: 'Go', years: 7.3 },
     ];
   },
 };
+
+// Export the actual data object with consistent naming
+export const portfolioData = portfolioSchema;
+export default portfolioSchema;

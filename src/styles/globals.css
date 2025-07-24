@@ -654,3 +654,8 @@ html {
 .fade-in {
   animation: fadeIn 0.5s ease-out;
 }
+
+/* Remove scroll-snap from main to prevent conflicts */
+main {
+  overflow-x: hidden;
+}

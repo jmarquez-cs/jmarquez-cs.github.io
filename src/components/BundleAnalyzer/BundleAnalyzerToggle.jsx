@@ -13,13 +13,13 @@ const BundleAnalyzerToggle = ({ isVisible, onToggle }) => {
 
   return (
     <FloatingButton
-      position="below"
+      position="above"
       icon={icon}
       isActive={isVisible}
       onClick={handleToggle}
       ariaLabel={ariaLabel}
       title={title}
-      zIndex={9998}
+      zIndex={9996}
       developmentOnly={true}
     />
   );

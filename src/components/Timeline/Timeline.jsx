@@ -1,9 +1,10 @@
 import React, { useMemo, useRef, useCallback, useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { careerLocations } from '../../data/worldGlobeData';
 import { portfolioSchema } from '../../data/portfolioData';
 import './Timeline.css';
 
-const Timeline = () => {
+const Timeline = ({ onYearChange }) => {
   const timelineRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
@@ -55,15 +56,18 @@ const Timeline = () => {
     const totalDots = 7;
     const centerIndex = Math.floor(totalDots / 2);
 
+    // If no selection (currentIndex = -1), show middle section of timeline
+    const baseIndex = currentIndex === -1 ? Math.floor(timelineData.length / 2) : currentIndex;
+
     for (let i = 0; i < totalDots; i++) {
       const offset = i - centerIndex;
-      const dataIndex = (currentIndex + offset + timelineData.length) % timelineData.length;
+      const dataIndex = (baseIndex + offset + timelineData.length) % timelineData.length;
       const item = timelineData[dataIndex];
 
       dots.push({
         ...item,
         position: i,
-        isCenter: i === centerIndex,
+        isCenter: i === centerIndex && currentIndex !== -1, // No center highlighting when no selection
         offset: offset,
       });
     }
@@ -91,10 +95,16 @@ const Timeline = () => {
   // Handle click on timeline dots
   const handleDotClick = useCallback(
     (offset) => {
-      const targetIndex = currentIndex + offset;
-      navigateToIndex(targetIndex);
+      if (currentIndex === -1) {
+        // First click from no selection state - select the center position
+        const centerIndex = Math.floor(timelineData.length / 2);
+        navigateToIndex(centerIndex + offset);
+      } else {
+        const targetIndex = currentIndex + offset;
+        navigateToIndex(targetIndex);
+      }
     },
-    [currentIndex, navigateToIndex],
+    [currentIndex, navigateToIndex, timelineData.length],
   );
 
   // Handle keyboard navigation
@@ -102,13 +112,21 @@ const Timeline = () => {
     (event) => {
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
-        navigateToIndex(currentIndex - 1);
+        if (currentIndex === -1) {
+          navigateToIndex(Math.floor(timelineData.length / 2) - 1);
+        } else {
+          navigateToIndex(currentIndex - 1);
+        }
       } else if (event.key === 'ArrowRight') {
         event.preventDefault();
-        navigateToIndex(currentIndex + 1);
+        if (currentIndex === -1) {
+          navigateToIndex(Math.floor(timelineData.length / 2) + 1);
+        } else {
+          navigateToIndex(currentIndex + 1);
+        }
       }
     },
-    [currentIndex, navigateToIndex],
+    [currentIndex, navigateToIndex, timelineData.length],
   );
 
   // Handle scroll wheel navigation (prevent all scrolling)
@@ -117,47 +135,62 @@ const Timeline = () => {
       event.preventDefault();
       event.stopPropagation();
 
+      const centerIndex = Math.floor(timelineData.length / 2);
+
       // Only respond to horizontal scroll or if vertical scroll is more significant
       if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
         if (event.deltaX > 0) {
-          navigateToIndex(currentIndex + 1);
+          navigateToIndex(currentIndex === -1 ? centerIndex + 1 : currentIndex + 1);
         } else {
-          navigateToIndex(currentIndex - 1);
+          navigateToIndex(currentIndex === -1 ? centerIndex - 1 : currentIndex - 1);
         }
       } else if (Math.abs(event.deltaY) > 5) {
         // Convert vertical scroll to horizontal navigation
         if (event.deltaY > 0) {
-          navigateToIndex(currentIndex + 1);
+          navigateToIndex(currentIndex === -1 ? centerIndex + 1 : currentIndex + 1);
         } else {
-          navigateToIndex(currentIndex - 1);
+          navigateToIndex(currentIndex === -1 ? centerIndex - 1 : currentIndex - 1);
         }
       }
     },
-    [currentIndex, navigateToIndex],
+    [currentIndex, navigateToIndex, timelineData.length],
   );
 
-  // Initialize center position
+  // Initialize with no selection (null state)
   useEffect(() => {
-    setCurrentIndex(Math.floor(timelineData.length / 2));
+    setCurrentIndex(-1); // Start with no selection
   }, [timelineData.length]);
+
+  // Notify parent component when year changes
+  useEffect(() => {
+    if (onYearChange) {
+      if (currentIndex >= 0 && timelineData[currentIndex]) {
+        onYearChange(timelineData[currentIndex].date);
+      } else {
+        onYearChange(null); // Explicitly communicate no selection
+      }
+    }
+  }, [currentIndex, timelineData, onYearChange]);
 
   // Handle touch zone clicks
   const handleLeftZoneClick = useCallback(
     (event) => {
       event.preventDefault();
       event.stopPropagation();
-      navigateToIndex(currentIndex - 1);
+      const centerIndex = Math.floor(timelineData.length / 2);
+      navigateToIndex(currentIndex === -1 ? centerIndex - 1 : currentIndex - 1);
     },
-    [currentIndex, navigateToIndex],
+    [currentIndex, navigateToIndex, timelineData.length],
   );
 
   const handleRightZoneClick = useCallback(
     (event) => {
       event.preventDefault();
       event.stopPropagation();
-      navigateToIndex(currentIndex + 1);
+      const centerIndex = Math.floor(timelineData.length / 2);
+      navigateToIndex(currentIndex === -1 ? centerIndex + 1 : currentIndex + 1);
     },
-    [currentIndex, navigateToIndex],
+    [currentIndex, navigateToIndex, timelineData.length],
   );
 
   // Prevent all scrolling and touch behaviors
@@ -235,6 +268,10 @@ const Timeline = () => {
       </div>
     </div>
   );
+};
+
+Timeline.propTypes = {
+  onYearChange: PropTypes.func,
 };
 
 export default Timeline;

@@ -1,0 +1,16 @@
+
+User-agent: *
+Allow: /
+
+# Optimize crawl budget
+Disallow: /node_modules/
+Disallow: /src/
+Disallow: /.git/
+Disallow: /dist/
+Disallow: *.map
+
+# Sitemap location
+Sitemap: https://jmarquez-cs.github.io/sitemap.xml
+
+# Crawl delay to be respectful
+Crawl-delay: 1

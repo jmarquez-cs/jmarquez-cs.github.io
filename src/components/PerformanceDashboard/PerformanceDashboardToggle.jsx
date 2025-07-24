@@ -22,7 +22,7 @@ const PerformanceDashboardToggle = ({ isVisible, onToggle }) => {
       onClick={handleToggle}
       ariaLabel={ariaLabel}
       title={title}
-      zIndex={9998}
+      zIndex={9999}
     />
   );
 };

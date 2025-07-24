@@ -14,15 +14,16 @@ export const Navigation = React.memo(() => {
       const viewportHeight = window.innerHeight;
       const elementHeight = element.offsetHeight;
 
-      // Calculate offset to center the section in viewport
+      // Calculate offset - for full-height sections (like skills radar), just offset by navbar
+      // For smaller sections, center them in viewport
       let offsetPosition;
-      if (elementHeight < viewportHeight - navbarHeight) {
+      if (elementHeight >= viewportHeight * 0.9) {
+        // If section is nearly full height or larger, just offset by navbar height
+        offsetPosition = elementPosition - navbarHeight;
+      } else {
         // If section is smaller than viewport, center it
         offsetPosition =
           elementPosition - navbarHeight - (viewportHeight - navbarHeight - elementHeight) / 2;
-      } else {
-        // If section is larger than viewport, just offset by navbar height
-        offsetPosition = elementPosition - navbarHeight;
       }
 
       window.scrollTo({

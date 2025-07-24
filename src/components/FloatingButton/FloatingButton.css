@@ -59,6 +59,15 @@
   z-index: 9998;
 }
 
+/* Support for multiple buttons in same position - staggered by z-index */
+.floating-button-above[style*='z-index: 9999'] {
+  top: calc(50% - 144px); /* Stack higher z-index buttons further up */
+}
+
+.floating-button-above[style*='z-index: 9996'] {
+  top: calc(50% - 72px); /* Lower z-index stays in original position */
+}
+
 /* Ensure floating buttons appear above dashboards when active */
 .floating-button-base.active,
 .floating-button-floating.active {

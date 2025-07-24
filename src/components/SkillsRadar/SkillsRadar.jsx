@@ -8,7 +8,37 @@ import './SkillsRadar.css';
 const SkillsRadar = ({ portfolioData, animated = true, showLegend = true }) => {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
+  const sectionRef = useRef(null);
   const { theme, isDark } = useTheme();
+
+  // Mobile scroll positioning enhancement
+  useEffect(() => {
+    const handleMobileNavigation = () => {
+      const isMobile = window.innerWidth <= 767;
+      if (!isMobile || !sectionRef.current) return;
+
+      // Check if this section was navigated to via hash
+      if (window.location.hash === '#skills') {
+        setTimeout(() => {
+          const rect = sectionRef.current.getBoundingClientRect();
+          const targetY = window.scrollY + rect.top - window.innerHeight * 0.1;
+
+          window.scrollTo({
+            top: targetY,
+            behavior: 'smooth',
+          });
+        }, 100);
+      }
+    };
+
+    // Listen for hash changes and initial load
+    window.addEventListener('hashchange', handleMobileNavigation);
+    handleMobileNavigation();
+
+    return () => {
+      window.removeEventListener('hashchange', handleMobileNavigation);
+    };
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current || !portfolioData) return;
@@ -155,7 +185,7 @@ const SkillsRadar = ({ portfolioData, animated = true, showLegend = true }) => {
   };
 
   return (
-    <section id="skills" className="section skills-radar-section">
+    <section id="skills" className="section skills-radar-section" ref={sectionRef}>
       <h2 className="section-title">Tech Skill Radar</h2>
       <div className="skills-radar-container">
         <canvas ref={canvasRef} className="skills-radar-chart" />

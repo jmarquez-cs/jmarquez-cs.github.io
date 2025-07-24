@@ -507,7 +507,7 @@ const WorldGlobe = ({
         }}
       />
 
-      {selectedMarker && (
+      {selectedMarker && selectedMarker.location && (
         <div className="world-globe-info">
           <div className="info-header">
             <button
@@ -568,39 +568,25 @@ const WorldGlobe = ({
                 </div>
               )}
 
-            {/* Display metrics if available (patents, certifications, etc.) */}
-            {selectedMarker.location && (
+            {/* Display metrics if available */}
+            {selectedMarker.location?.metrics && (
               <div className="info-metrics">
-                {selectedMarker.location.patents && (
-                  <div className="metric-item">
-                    <span className="metric-label">Patents:</span>
-                    <span className="metric-value">{selectedMarker.location.patents}</span>
-                  </div>
-                )}
-                {selectedMarker.location.certification && (
-                  <div className="metric-item">
-                    <span className="metric-label">Certification:</span>
-                    <span className="metric-value">{selectedMarker.location.certification}</span>
-                  </div>
-                )}
-                {selectedMarker.location.whitepapers && (
-                  <div className="metric-item">
-                    <span className="metric-label">Whitepapers:</span>
-                    <span className="metric-value">{selectedMarker.location.whitepapers}</span>
-                  </div>
-                )}
-                {selectedMarker.location.funding && (
-                  <div className="metric-item">
-                    <span className="metric-label">Funding:</span>
-                    <span className="metric-value">{selectedMarker.location.funding}</span>
-                  </div>
-                )}
-                {selectedMarker.location.teamSize && (
-                  <div className="metric-item">
-                    <span className="metric-label">Team Size:</span>
-                    <span className="metric-value">{selectedMarker.location.teamSize}</span>
-                  </div>
-                )}
+                {Object.entries(selectedMarker.location.metrics).map(([key, value]) => {
+                  // Format camelCase keys to proper display names
+                  const formatKey = (str) => {
+                    return str
+                      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+                      .replace(/^./, (char) => char.toUpperCase()) // Capitalize first letter
+                      .trim(); // Remove any extra whitespace
+                  };
+
+                  return (
+                    <div key={key} className="metric-item">
+                      <span className="metric-label">{formatKey(key)}:</span>
+                      <span className="metric-value">{value}</span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

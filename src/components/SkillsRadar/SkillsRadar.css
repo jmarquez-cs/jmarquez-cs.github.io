@@ -1,13 +1,12 @@
-/* Skills Radar Section Viewport Heights - matching Hero, About, and Portfolio sections */
+/* Skills Radar Section - matching About section exactly */
 .skills-radar-section {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  position: relative;
+  z-index: 2;
+  background: var(--bg-primary);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  padding: var(--space-4) 0;
-  width: 100%;
 }
 
 .skills-radar-container {
@@ -18,7 +17,7 @@
   max-width: 900px;
   height: 500px;
   padding: 20px;
-  margin-top: var(--space-6);
+  margin: var(--space-6) auto 0 auto;
 }
 
 .skills-radar-chart {
@@ -27,59 +26,22 @@
   max-width: 800px;
 }
 
-/* Desktop viewport height adjustments */
-@media (min-width: 1024px) {
+@media (max-width: 768px) {
   .skills-radar-section {
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: var(--space-6) 0;
+    height: 100vh;
+    padding: 1rem;
   }
 
   .skills-radar-container {
-    height: 600px;
-    max-width: 1000px;
-  }
-}
-
-/* Tablet viewport height adjustments */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .skills-radar-section {
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: var(--space-5) 0;
-  }
-
-  .skills-radar-container {
-    height: 550px;
-    max-width: 900px;
-    padding: 15px;
-  }
-}
-
-/* Mobile viewport height adjustments */
-@media (max-width: 767px) {
-  .skills-radar-section {
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: var(--space-4) 0;
-  }
-
-  .skills-radar-container {
-    height: 400px;
+    height: 350px;
     padding: 10px;
     margin-top: var(--space-4);
   }
 }
 
 @media (max-width: 480px) {
-  .skills-radar-section {
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: var(--space-3) 0;
-  }
-
   .skills-radar-container {
-    height: 350px;
+    height: 320px;
     padding: 5px;
     margin-top: var(--space-3);
   }

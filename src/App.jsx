@@ -19,6 +19,10 @@ import PerformanceDashboardToggle from './components/PerformanceDashboard/Perfor
 import { usePerformanceDashboardVisibility } from './hooks/usePerformanceDashboardVisibility';
 import BundleAnalyzerToggle from './components/BundleAnalyzer/BundleAnalyzerToggle';
 import SkillsRadar from './components/SkillsRadar';
+import { SEODashboard } from './components/SEODashboard';
+import { useSEO } from './hooks/useSEO';
+import FloatingButton from './components/FloatingButton';
+import { useState } from 'react';
 
 // Strategic lazy loading with resource hints
 const Portfolio = lazy(() =>
@@ -114,6 +118,11 @@ const AppComponent = () => {
   const { isVisible: isPerformanceDashboardVisible, setIsVisible: setPerformanceDashboardVisible } =
     usePerformanceDashboardVisibility();
 
+  // SEO Integration
+  const [currentSection, setCurrentSection] = useState('home');
+  const [seoDashboardVisible, setSeoDashboardVisible] = useState(false);
+  const { updateSEO } = useSEO(currentSection);
+
   // Preload critical resources on idle
   useEffect(() => {
     if ('requestIdleCallback' in window) {
@@ -124,6 +133,33 @@ const AppComponent = () => {
       });
     }
   }, []);
+
+  // SEO section tracking with intersection observer
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -20% 0px',
+      threshold: 0.5,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          if (sectionId && sectionId !== currentSection) {
+            setCurrentSection(sectionId);
+            updateSEO(sectionId);
+          }
+        }
+      });
+    }, observerOptions);
+
+    // Observe sections
+    const sections = document.querySelectorAll('#about, #portfolio, #skills');
+    sections.forEach((section) => observer.observe(section));
+
+    return () => observer.disconnect();
+  }, [currentSection, updateSEO]);
 
   // Portfolio data matching SkillsRadar interface contract
   const portfolioData = useMemo(
@@ -157,8 +193,12 @@ const AppComponent = () => {
   return (
     <div className="App">
       <Navigation />
-      <main id="main-content">
-        <Hero />
+      <main className="main-content">
+        <ErrorBoundary componentName="Hero">
+          <LazySection fallback={<GlobalLoading componentName="Hero" />}>
+            <Hero />
+          </LazySection>
+        </ErrorBoundary>
         <About />
 
         {/* Portfolio with intersection-based lazy loading */}
@@ -182,14 +222,16 @@ const AppComponent = () => {
           </LazySection>
         </ErrorBoundary>
 
-        <LazySection>
-          <section id="palette" className="section">
-            <div className="container">
-              <h2 className="section-title">COLOR PALETTE</h2>
-              <ColorPalette />
-            </div>
-          </section>
-        </LazySection>
+        <ErrorBoundary componentName="ColorPalette">
+          <LazySection fallback={<GlobalLoading componentName="Color Palette" />}>
+            <section id="palette" className="section">
+              <div className="container">
+                <h2 className="section-title">COLOR PALETTE</h2>
+                <ColorPalette />
+              </div>
+            </section>
+          </LazySection>
+        </ErrorBoundary>
 
         <ErrorBoundary componentName="Mermaid">
           <LazySection
@@ -231,6 +273,19 @@ const AppComponent = () => {
             onToggle={() => setPerformanceDashboardVisible(!isPerformanceDashboardVisible)}
           />
           <PerformanceDashboard isVisible={isPerformanceDashboardVisible} componentName="App" />
+
+          {/* SEO Dashboard Toggle */}
+          <FloatingButton
+            position="below"
+            icon={seoDashboardVisible ? '❌' : '🔍'}
+            isActive={seoDashboardVisible}
+            onClick={() => setSeoDashboardVisible(!seoDashboardVisible)}
+            ariaLabel={`${seoDashboardVisible ? 'Hide' : 'Show'} SEO Dashboard`}
+            title={`${seoDashboardVisible ? 'Hide' : 'Show'} SEO Performance Monitor`}
+            zIndex={9997}
+            developmentOnly={true}
+          />
+          <SEODashboard isVisible={seoDashboardVisible} />
         </>
       )}
     </div>
