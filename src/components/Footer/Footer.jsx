@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import { useConfetti } from '../../hooks/useConfetti';
+import GlitchText from '../GlitchText';
 import './Footer.css';
 
 const FooterComponent = () => {
@@ -65,7 +66,14 @@ const FooterComponent = () => {
               ✨
             </span>
             <span className="footer-copyright">
-              © 2025 John Marquez. Fractional CTO & Blockchain Expert.
+              <GlitchText
+                trigger="onMount"
+                duration={1500}
+                charactersPerFrame={1}
+                className="brand-glitch"
+              >
+                © 2025 John Marquez. Fractional CTO & Blockchain Expert.
+              </GlitchText>
             </span>
           </div>
           <div className="footer-links">
@@ -78,7 +86,16 @@ const FooterComponent = () => {
               aria-label="Visit LinkedIn profile (opens in new tab)"
             >
               <FaLinkedin className="footer-icon" />
-              <span>LinkedIn</span>
+              <span>
+                <GlitchText
+                  trigger="onMount"
+                  duration={1000}
+                  charactersPerFrame={1}
+                  className="brand-glitch"
+                >
+                  LinkedIn
+                </GlitchText>
+              </span>
             </a>
             <a
               href="https://github.com/jmarquez-cs"
@@ -89,7 +106,16 @@ const FooterComponent = () => {
               aria-label="Visit GitHub profile (opens in new tab)"
             >
               <FaGithub className="footer-icon" />
-              <span>GitHub</span>
+              <span>
+                <GlitchText
+                  trigger="onMount"
+                  duration={1000}
+                  charactersPerFrame={1}
+                  className="brand-glitch"
+                >
+                  GitHub
+                </GlitchText>
+              </span>
             </a>
           </div>
         </div>

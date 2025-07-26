@@ -148,6 +148,11 @@ export const careerLocations = [
     period: '2022-07 to 2023-05',
     technologies: ['DevOps', 'Security', 'CI/CD', 'Cloud Infrastructure'],
     city: 'St. Louis, MO',
+    metrics: {
+      grantValue: 'HBAR Foundation',
+      infrastructure: 'Terraform IaaC',
+      platform: 'GCP OpenSearch',
+    },
   },
   {
     lat: 39.742043,

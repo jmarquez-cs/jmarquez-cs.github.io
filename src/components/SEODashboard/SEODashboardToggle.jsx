@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useDeveloperMode } from '../../contexts/DeveloperModeContext';
 import FloatingButton from '../FloatingButton';
 
-const PerformanceDashboardToggle = ({ isVisible, onToggle }) => {
+const SEODashboardToggle = ({ isVisible, onToggle }) => {
   const { shouldShowDeveloperFeatures } = useDeveloperMode();
 
   const handleToggle = useCallback(() => {
@@ -14,26 +14,26 @@ const PerformanceDashboardToggle = ({ isVisible, onToggle }) => {
     return null;
   }
 
-  const icon = isVisible ? '❌' : '📊';
-  const ariaLabel = `${isVisible ? 'Hide' : 'Show'} Performance Dashboard`;
-  const title = `${ariaLabel} - Real-time Performance Metrics`;
+  const icon = isVisible ? '❌' : '🔍';
+  const ariaLabel = `${isVisible ? 'Hide' : 'Show'} SEO Dashboard`;
+  const title = `${ariaLabel} - SEO Performance Monitor`;
 
   return (
     <FloatingButton
-      position="above"
+      position="below"
       icon={icon}
       isActive={isVisible}
       onClick={handleToggle}
       ariaLabel={ariaLabel}
       title={title}
-      zIndex={9999}
+      zIndex={9997}
     />
   );
 };
 
-PerformanceDashboardToggle.propTypes = {
+SEODashboardToggle.propTypes = {
   isVisible: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
 };
 
-export default React.memo(PerformanceDashboardToggle);
+export default React.memo(SEODashboardToggle);

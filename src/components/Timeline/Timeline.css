@@ -52,11 +52,32 @@
 .timeline-scroll {
   display: flex;
   align-items: center;
-  justify-content: center;
   height: 80px;
   position: relative;
   gap: 2rem;
   width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  cursor: grab;
+  user-select: none;
+  padding: 0 50%;
+}
+
+.timeline-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.timeline-scroll.dragging {
+  cursor: grabbing;
+  scroll-behavior: auto;
+}
+
+.timeline-scroll.snapping {
+  scroll-behavior: smooth;
 }
 
 .timeline-scroll::before {
@@ -104,7 +125,19 @@
   user-select: none;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  opacity: 0.5;
+  opacity: 0.3;
+  scroll-snap-align: center;
+  transform-origin: center;
+}
+
+.timeline-section.adjacent {
+  opacity: 0.6;
+  transform: scale(0.9);
+}
+
+.timeline-section.distant {
+  opacity: 0.2;
+  transform: scale(0.8);
 }
 
 .timeline-section:hover {
@@ -112,22 +145,36 @@
   opacity: 0.8;
 }
 
-.timeline-section.center {
-  transform: translateY(-6px) scale(1.15);
+.timeline-section.center.active {
+  transform: translateY(-8px) scale(1.2);
   opacity: 1;
+  z-index: 60;
 }
 
-.timeline-section.center .timeline-dot {
+.timeline-section.center.active .timeline-dot {
   background: var(--text-accent);
-  transform: scale(1.4);
-  box-shadow: 0 6px 16px var(--shadow-medium);
+  transform: scale(1.5);
+  box-shadow: 0 8px 20px var(--shadow-medium);
   border-color: var(--bg-primary);
+  animation: pulse 2s infinite;
 }
 
-.timeline-section.center .timeline-year-hidden {
+.timeline-section.center.active .timeline-year {
   opacity: 1;
-  color: var(--text-primary);
-  font-weight: 600;
+  color: var(--text-accent);
+  font-weight: 700;
+  font-size: 1rem;
+  text-shadow: 0 2px 4px var(--shadow-soft);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1.5);
+  }
+  50% {
+    transform: scale(1.6);
+  }
 }
 
 .timeline-section:hover .timeline-dot {
@@ -161,19 +208,28 @@
   opacity: 1;
 }
 
-.timeline-year-hidden {
+.timeline-year {
   font-size: 0.875rem;
-  color: transparent;
+  color: var(--text-muted);
   font-weight: 500;
   text-align: center;
-  opacity: 0;
+  opacity: 0.7;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: var(--font-secondary);
+  white-space: nowrap;
 }
 
-.timeline-section.center .timeline-year-hidden {
-  color: var(--text-primary);
+.timeline-section.adjacent .timeline-year {
+  color: var(--text-secondary);
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+.timeline-section.center.active .timeline-year {
+  color: var(--text-accent);
   opacity: 1;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 /* Touch zones for left/right navigation */
@@ -206,7 +262,41 @@
   background: var(--shadow-soft);
 }
 
-/* Mobile responsiveness */
+/* Momentum scrolling improvements */
+.timeline-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .timeline-scroll {
+    scroll-behavior: auto;
+  }
+
+  .timeline-section,
+  .timeline-dot {
+    transition: none;
+  }
+
+  .timeline-section.center.active .timeline-dot {
+    animation: none;
+  }
+}
+
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+  .timeline-section.center.active .timeline-year {
+    text-shadow: 2px 2px 4px var(--shadow);
+    font-weight: 800;
+  }
+
+  .timeline-section.center.active .timeline-dot {
+    border: 3px solid var(--text-primary);
+  }
+}
+
+/* Mobile responsiveness with enhanced touch */
 @media (max-width: 768px) {
   .timeline-container {
     padding: 1rem 0;
@@ -216,11 +306,13 @@
     height: 60px;
     padding: 0 40vw;
     gap: 1.5rem;
+    scroll-snap-type: x mandatory;
   }
 
   .timeline-section {
     min-width: 80px;
     padding: 0.25rem;
+    scroll-snap-align: center;
   }
 
   .timeline-dot {
@@ -231,6 +323,12 @@
   .timeline-center-indicator {
     height: 30px;
     width: 3px;
+  }
+
+  /* Enhanced touch targets */
+  .timeline-section {
+    min-height: 44px;
+    min-width: 88px;
   }
 }
 
@@ -250,16 +348,22 @@
   }
 }
 
-/* Prevent scrolling on touch devices */
+/* Enhanced touch device support */
 @media (hover: none) and (pointer: coarse) {
   .timeline-container {
     overflow: hidden;
-    touch-action: none;
+    touch-action: pan-x;
+  }
+
+  .timeline-scroll {
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
   }
 
   .timeline-nav-zone {
     /* Make touch zones more prominent on mobile */
     width: 45%;
+    touch-action: manipulation;
   }
 
   .timeline-nav-zone.left {
@@ -268,6 +372,11 @@
 
   .timeline-nav-zone.right {
     right: 5%;
+  }
+
+  /* Improve haptic feedback visual cues */
+  .timeline-section.center.active {
+    transform: translateY(-6px) scale(1.15);
   }
 }
 

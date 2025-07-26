@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { usePerformanceMonitor } from '../../hooks/usePerformanceMonitor';
 import { WorldGlobe } from '../WorldGlobe';
 import { Timeline } from '../Timeline';
+import LocationInfoCard from '../LocationInfoCard';
 import { careerLocations } from '../../data/worldGlobeData';
 import './Portfolio.css';
 
@@ -10,30 +11,6 @@ const PortfolioComponent = () => {
 
   const [selectedYear, setSelectedYear] = useState(null);
   const [selectedLocationData, setSelectedLocationData] = useState(null);
-
-  // Find the closest career location for a given year
-  const findClosestLocation = (year) => {
-    if (!year) return null;
-
-    const targetYear = parseInt(year);
-    let closestLocation = null;
-    let smallestDifference = Infinity;
-
-    careerLocations.forEach((location) => {
-      const periodMatch = location.period.match(/(\d{4})/g);
-      if (periodMatch) {
-        const locationYear = parseInt(periodMatch[0]);
-        const difference = Math.abs(locationYear - targetYear);
-
-        if (difference < smallestDifference) {
-          smallestDifference = difference;
-          closestLocation = location;
-        }
-      }
-    });
-
-    return closestLocation;
-  };
 
   // Handle timeline year changes
   const handleTimelineChange = useCallback((year) => {
@@ -129,85 +106,13 @@ const PortfolioComponent = () => {
               />
             </React.Suspense>
             {/* Timeline-controlled info display */}
-            {selectedYear && selectedLocationData ? (
-              <div className="world-globe-info">
-                <div className="info-header">
-                  <button
-                    onClick={() => {
-                      setSelectedYear(null);
-                      setSelectedLocationData(null);
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '1.2rem',
-                      color: '#666',
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className="info-content">
-                  <div className="info-meta">
-                    <span className="meta-label">Company:</span>
-                    <span className="meta-value">{selectedLocationData.company}</span>
-                  </div>
-                  <div className="info-meta">
-                    <span className="meta-label">Role:</span>
-                    <span className="meta-value">{selectedLocationData.role}</span>
-                  </div>
-                  <div className="info-meta">
-                    <span className="meta-label">Period:</span>
-                    <span className="meta-value">{selectedLocationData.period}</span>
-                  </div>
-                  <div className="info-meta">
-                    <span className="meta-label">Location:</span>
-                    <span className="meta-value">{selectedLocationData.city}</span>
-                  </div>
-
-                  {selectedLocationData.desc && (
-                    <div className="info-description">
-                      <p>{selectedLocationData.desc}</p>
-                    </div>
-                  )}
-
-                  {selectedLocationData.technologies && (
-                    <div className="info-technologies">
-                      <h4>Technologies:</h4>
-                      <div className="tech-tags">
-                        {selectedLocationData.technologies.map((tech, index) => (
-                          <span key={index} className="tech-tag">
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedLocationData.patents && (
-                    <div className="info-meta">
-                      <span className="meta-label">Patents:</span>
-                      <span className="meta-value">{selectedLocationData.patents}</span>
-                    </div>
-                  )}
-
-                  {selectedLocationData.certification && (
-                    <div className="info-meta">
-                      <span className="meta-label">Certification:</span>
-                      <span className="meta-value">{selectedLocationData.certification}</span>
-                    </div>
-                  )}
-
-                  {selectedLocationData.whitepapers && (
-                    <div className="info-meta">
-                      <span className="meta-label">Whitepapers:</span>
-                      <span className="meta-value">{selectedLocationData.whitepapers}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : null}
+            <LocationInfoCard
+              locationData={selectedLocationData ? { location: selectedLocationData } : null}
+              onClose={() => {
+                setSelectedYear(null);
+                setSelectedLocationData(null);
+              }}
+            />
           </div>
 
           {/* Timeline Section - overlay within portfolio section */}

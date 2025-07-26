@@ -1,13 +1,16 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { GameVisibilityProvider } from '../contexts/GameVisibilityContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { GameVisibilityProvider } from '../contexts/GameVisibilityContext';
+import { DeveloperModeProvider } from '../contexts/DeveloperModeContext';
 
 export const AppProviders = ({ children }) => {
   return (
-    <GameVisibilityProvider>
-      <ThemeProvider>{children}</ThemeProvider>
-    </GameVisibilityProvider>
+    <ThemeProvider>
+      <DeveloperModeProvider>
+        <GameVisibilityProvider>{children}</GameVisibilityProvider>
+      </DeveloperModeProvider>
+    </ThemeProvider>
   );
 };
 

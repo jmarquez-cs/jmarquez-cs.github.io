@@ -1,0 +1,6 @@
+/* SEODashboardToggle specific styles - all floating styles are in FloatingButton.css */
+
+/* Only keep styles for non-floating SEO dashboard toggle variants if needed in the future */
+.seo-toggle-inline {
+  /* Reserved for potential inline SEO toggle variants */
+}

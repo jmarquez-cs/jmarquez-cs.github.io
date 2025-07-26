@@ -1,0 +1,105 @@
+.drawer-nav {
+  width: 100%;
+}
+
+.drawer-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.drawer-link {
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: var(--font-secondary);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: left;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  position: relative;
+}
+
+.drawer-link:hover {
+  background: var(--bg-hover);
+  color: var(--text-accent);
+  transform: translateX(8px);
+}
+
+.drawer-link:active {
+  transform: translateX(8px) scale(0.98);
+}
+
+.theme-toggle-drawer {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.theme-toggle-drawer:hover {
+  background: var(--bg-accent);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .drawer-link {
+    font-size: var(--text-base);
+    padding: 0.875rem 1.25rem;
+  }
+
+  .theme-toggle-drawer {
+    padding-top: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .drawer-link {
+    font-size: var(--text-sm);
+    padding: 0.75rem 1rem;
+  }
+
+  .theme-toggle-drawer {
+    padding-top: 1rem;
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-width: 390px) {
+  .drawer-link {
+    padding: 0.625rem 0.875rem;
+  }
+
+  .theme-toggle-drawer {
+    padding-top: 0.875rem;
+    margin-top: 0.625rem;
+  }
+}
+
+@media (max-width: 375px) {
+  .drawer-link {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .theme-toggle-drawer {
+    padding-top: 0.75rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Add any specific NavigationDrawer styling here */
+
+.developer-toggle-drawer {
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+}

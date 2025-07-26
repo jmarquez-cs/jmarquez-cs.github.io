@@ -1,0 +1,11 @@
+.glitch-text {
+  /* Minimal styling to prevent layout shift */
+  display: inline;
+  position: relative;
+}
+
+/* Ensure no layout shift during animation */
+.glitch-text {
+  min-width: fit-content;
+  white-space: nowrap;
+}

@@ -6,6 +6,8 @@ import { useBundleAnalyzerVisibility } from '../../hooks/useBundleAnalyzerVisibi
 import BundleAnalyzerToggle from './BundleAnalyzerToggle';
 import './BundleAnalyzer.css';
 
+// Removed duplicate PerformanceDashboard component - using the one from PerformanceDashboard module
+
 // Utility functions moved outside component to prevent re-creation
 const formatSize = (bytes) => {
   if (bytes === 0) return '0 Bytes';
@@ -257,11 +259,11 @@ RecommendationsTab.propTypes = {
 };
 
 // Main component - now focused on state and layout
-const BundleAnalyzerComponent = ({ isVisible: propIsVisible = true }) => {
+const BundleAnalyzerComponent = ({ isVisible = true }) => {
+  // Move all hooks before any conditional returns
   const { totalSize, compressedSize, chunks, dependencies, cacheEfficiency } = useBundleAnalyzer();
   const budgetStatus = usePerformanceBudget();
   const { theme } = useTheme();
-  const { isVisible, toggleVisibility } = useBundleAnalyzerVisibility();
   const [activeTab, setActiveTab] = useState('overview');
 
   // Track if analyzer has been closed this session to hide toggle button
@@ -280,9 +282,12 @@ const BundleAnalyzerComponent = ({ isVisible: propIsVisible = true }) => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
-  if (process.env.NODE_ENV !== 'development') {
+  // Early return after all hooks are called
+  if (!isVisible) {
     return null;
   }
+
+  // BundleAnalyzer visibility is now controlled by the toggle component and DeveloperModeContext
 
   // Simple calculations moved to render time - no unnecessary memoization
   const overallCompressionRatio =
@@ -350,11 +355,11 @@ const BundleAnalyzerComponent = ({ isVisible: propIsVisible = true }) => {
   const { grade, color: gradeColor } = getScoreGrade(overallScore);
 
   const handleToggle = () => {
-    if (isVisible) {
+    if (!isVisible) {
       setHasBeenClosed(true);
       localStorage.setItem('bundleAnalyzerClosedThisSession', 'true');
     }
-    toggleVisibility();
+    // setIsVisible(!isVisible); // The visibility is controlled outside
   };
 
   // Don't render anything if it's been closed this session
@@ -365,69 +370,68 @@ const BundleAnalyzerComponent = ({ isVisible: propIsVisible = true }) => {
   return (
     <>
       <BundleAnalyzerToggle isVisible={isVisible} onToggle={handleToggle} />
-      {isVisible && (
-        <div className={`bundle-analyzer ${theme}`}>
-          <div className="bundle-analyzer-header">
-            <div className="header-content">
-              <h3>📊 Bundle Analyzer</h3>
-              <div className="header-controls">
-                <div className="bundle-score">
-                  <span className="score-label">Bundle Score</span>
-                  <span className="score-value" style={{ color: gradeColor }}>
-                    {overallScore}/100 ({grade})
-                  </span>
-                </div>
-                <button
-                  className="refresh-button"
-                  onClick={() => window.location.reload()}
-                  title="Refresh data"
-                >
-                  🔄
-                </button>
+
+      <div className={`bundle-analyzer ${theme}`}>
+        <div className="bundle-analyzer-header">
+          <div className="header-content">
+            <h3>📊 Bundle Analyzer</h3>
+            <div className="header-controls">
+              <div className="bundle-score">
+                <span className="score-label">Bundle Score</span>
+                <span className="score-value" style={{ color: gradeColor }}>
+                  {overallScore}/100 ({grade})
+                </span>
               </div>
+              <button
+                className="refresh-button"
+                onClick={() => window.location.reload()}
+                title="Refresh data"
+              >
+                🔄
+              </button>
             </div>
           </div>
-
-          <div className="bundle-analyzer-tabs">
-            {['overview', 'chunks', 'dependencies', 'recommendations'].map((tab) => (
-              <button
-                key={tab}
-                className={`tab-button ${activeTab === tab ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div className="bundle-analyzer-content">
-            {activeTab === 'overview' && (
-              <div className="overview-tab">
-                <div className="metrics-grid">
-                  <PerformanceScores performanceScore={performanceScore} />
-                  <BundleSummary
-                    totalSize={totalSize}
-                    compressedSize={compressedSize}
-                    compressionRatio={overallCompressionRatio}
-                    chunksCount={chunks.length}
-                  />
-                  <BudgetStatus budgetStatus={budgetStatus} />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'chunks' && <ChunksTab chunks={chunks} />}
-
-            {activeTab === 'dependencies' && (
-              <DependenciesTab dependencies={dependencies} totalSize={totalSize} />
-            )}
-
-            {activeTab === 'recommendations' && (
-              <RecommendationsTab recommendations={recommendations} />
-            )}
-          </div>
         </div>
-      )}
+
+        <div className="bundle-analyzer-tabs">
+          {['overview', 'chunks', 'dependencies', 'recommendations'].map((tab) => (
+            <button
+              key={tab}
+              className={`tab-button ${activeTab === tab ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        <div className="bundle-analyzer-content">
+          {activeTab === 'overview' && (
+            <div className="overview-tab">
+              <div className="metrics-grid">
+                <PerformanceScores performanceScore={performanceScore} />
+                <BundleSummary
+                  totalSize={totalSize}
+                  compressedSize={compressedSize}
+                  compressionRatio={overallCompressionRatio}
+                  chunksCount={chunks.length}
+                />
+                <BudgetStatus budgetStatus={budgetStatus} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'chunks' && <ChunksTab chunks={chunks} />}
+
+          {activeTab === 'dependencies' && (
+            <DependenciesTab dependencies={dependencies} totalSize={totalSize} />
+          )}
+
+          {activeTab === 'recommendations' && (
+            <RecommendationsTab recommendations={recommendations} />
+          )}
+        </div>
+      </div>
     </>
   );
 };
@@ -438,3 +442,4 @@ BundleAnalyzerComponent.propTypes = {
 };
 
 export const BundleAnalyzer = React.memo(BundleAnalyzerComponent);
+BundleAnalyzer.displayName = 'BundleAnalyzer';

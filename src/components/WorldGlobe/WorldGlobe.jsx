@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../hooks/useTheme';
+import LocationInfoCard from '../LocationInfoCard';
 import './WorldGlobe.css';
 
 const WorldGlobe = ({
@@ -507,91 +508,7 @@ const WorldGlobe = ({
         }}
       />
 
-      {selectedMarker && selectedMarker.location && (
-        <div className="world-globe-info">
-          <div className="info-header">
-            <button
-              className="close-info"
-              onClick={() => setSelectedMarker(null)}
-              aria-label="Close info"
-            >
-              ×
-            </button>
-          </div>
-
-          <div className="info-content">
-            {selectedMarker.location?.company && (
-              <div className="info-meta">
-                <span className="meta-label">Company:</span>
-                <span className="meta-value">{selectedMarker.location.company}</span>
-              </div>
-            )}
-
-            {selectedMarker.location?.role && (
-              <div className="info-meta">
-                <span className="meta-label">Role:</span>
-                <span className="meta-value">{selectedMarker.location.role}</span>
-              </div>
-            )}
-
-            {selectedMarker.location?.period && (
-              <div className="info-meta">
-                <span className="meta-label">Period:</span>
-                <span className="meta-value">{selectedMarker.location.period}</span>
-              </div>
-            )}
-
-            {selectedMarker.location?.city && (
-              <div className="info-meta">
-                <span className="meta-label">Location:</span>
-                <span className="meta-value">{selectedMarker.location.city}</span>
-              </div>
-            )}
-
-            {selectedMarker.desc && (
-              <div className="info-description">
-                <p>{selectedMarker.desc}</p>
-              </div>
-            )}
-
-            {selectedMarker.location?.technologies &&
-              selectedMarker.location.technologies.length > 0 && (
-                <div className="info-technologies">
-                  <h4>Technologies:</h4>
-                  <div className="tech-tags">
-                    {selectedMarker.location.technologies.map((tech, index) => (
-                      <span key={index} className="tech-tag">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {/* Display metrics if available */}
-            {selectedMarker.location?.metrics && (
-              <div className="info-metrics">
-                {Object.entries(selectedMarker.location.metrics).map(([key, value]) => {
-                  // Format camelCase keys to proper display names
-                  const formatKey = (str) => {
-                    return str
-                      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-                      .replace(/^./, (char) => char.toUpperCase()) // Capitalize first letter
-                      .trim(); // Remove any extra whitespace
-                  };
-
-                  return (
-                    <div key={key} className="metric-item">
-                      <span className="metric-label">{formatKey(key)}:</span>
-                      <span className="metric-value">{value}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <LocationInfoCard locationData={selectedMarker} onClose={() => setSelectedMarker(null)} />
     </div>
   );
 };

@@ -1,8 +1,12 @@
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState, Suspense, lazy } from 'react';
 
 import TechnologyIcon from '../TechnologyIcon';
-import { WaveBackground } from '../WaveBackground';
 import './Hero.css';
+
+// Dynamic import to prevent build conflicts
+const WaveBackground = lazy(() =>
+  import('../WaveBackground').then((module) => ({ default: module.WaveBackground })),
+);
 
 const HeroComponent = () => {
   const heroRenderCount = useRef(0);
@@ -150,7 +154,9 @@ const HeroComponent = () => {
     <section id="hero" className="hero" ref={heroSectionRef} style={{ minHeight: dynamicHeight }}>
       {/* WaveBackground nested directly in Hero for desired positioning */}
       <div className="hero-wave-background">
-        <WaveBackground />
+        <Suspense fallback={null}>
+          <WaveBackground />
+        </Suspense>
       </div>
 
       {/* Technology swimlane - horizontal scrolling carousel above content */}

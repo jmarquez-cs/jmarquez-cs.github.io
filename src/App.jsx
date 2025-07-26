@@ -14,15 +14,17 @@ import { useGameVisibility } from './contexts/GameVisibilityContext';
 import { LazySection } from './components/LazySection';
 import { GlobalLoading } from './components/GlobalLoading';
 import { useBundleAnalyzerVisibility } from './hooks/useBundleAnalyzerVisibility';
-import PerformanceDashboard from './components/PerformanceDashboard';
+import { PerformanceDashboard } from './components/PerformanceDashboard';
 import PerformanceDashboardToggle from './components/PerformanceDashboard/PerformanceDashboardToggle';
 import { usePerformanceDashboardVisibility } from './hooks/usePerformanceDashboardVisibility';
 import BundleAnalyzerToggle from './components/BundleAnalyzer/BundleAnalyzerToggle';
 import SkillsRadar from './components/SkillsRadar';
 import { SEODashboard } from './components/SEODashboard';
+import SEODashboardToggle from './components/SEODashboard/SEODashboardToggle';
 import { useSEO } from './hooks/useSEO';
 import FloatingButton from './components/FloatingButton';
 import { useState } from 'react';
+import { BundleAnalyzer } from './components/BundleAnalyzer';
 
 // Strategic lazy loading with resource hints
 const Portfolio = lazy(() =>
@@ -61,11 +63,7 @@ const Games = lazy(() =>
   }),
 );
 
-const BundleAnalyzer = lazy(() =>
-  import('./components/BundleAnalyzer').then((module) => ({
-    default: module.BundleAnalyzer,
-  })),
-);
+// Removed duplicate BundleAnalyzerComponent - using direct import below
 
 // Lazy load WaveBackground with enhanced error boundary
 const WaveBackground = lazy(() =>
@@ -256,38 +254,31 @@ const AppComponent = () => {
         </Suspense>
       </ErrorBoundary>
 
-      {/* Bundle Analyzer - development only */}
-      {process.env.NODE_ENV === 'development' && bundleAnalyzerVisible && (
-        <Suspense fallback={<GlobalLoading componentName="Bundle Analyzer" />}>
-          <BundleAnalyzer />
-        </Suspense>
+      {/* Developer Tools - controlled by DeveloperModeContext */}
+      {bundleAnalyzerVisible && (
+        <ErrorBoundary componentName="BundleAnalyzer">
+          <Suspense fallback={<GlobalLoading componentName="Bundle Analyzer" />}>
+            <BundleAnalyzer isVisible={bundleAnalyzerVisible} />
+          </Suspense>
+        </ErrorBoundary>
       )}
-      {process.env.NODE_ENV === 'development' && (
-        <BundleAnalyzerToggle isVisible={bundleAnalyzerVisible} onToggle={toggleBundleAnalyzer} />
-      )}
+      <BundleAnalyzerToggle isVisible={bundleAnalyzerVisible} onToggle={toggleBundleAnalyzer} />
 
-      {process.env.NODE_ENV === 'development' && (
-        <>
-          <PerformanceDashboardToggle
-            isVisible={isPerformanceDashboardVisible}
-            onToggle={() => setPerformanceDashboardVisible(!isPerformanceDashboardVisible)}
-          />
+      {isPerformanceDashboardVisible && (
+        <ErrorBoundary componentName="PerformanceDashboard">
           <PerformanceDashboard isVisible={isPerformanceDashboardVisible} componentName="App" />
-
-          {/* SEO Dashboard Toggle */}
-          <FloatingButton
-            position="below"
-            icon={seoDashboardVisible ? '❌' : '🔍'}
-            isActive={seoDashboardVisible}
-            onClick={() => setSeoDashboardVisible(!seoDashboardVisible)}
-            ariaLabel={`${seoDashboardVisible ? 'Hide' : 'Show'} SEO Dashboard`}
-            title={`${seoDashboardVisible ? 'Hide' : 'Show'} SEO Performance Monitor`}
-            zIndex={9997}
-            developmentOnly={true}
-          />
-          <SEODashboard isVisible={seoDashboardVisible} />
-        </>
+        </ErrorBoundary>
       )}
+      <PerformanceDashboardToggle
+        isVisible={isPerformanceDashboardVisible}
+        onToggle={() => setPerformanceDashboardVisible(!isPerformanceDashboardVisible)}
+      />
+
+      <SEODashboardToggle
+        isVisible={seoDashboardVisible}
+        onToggle={() => setSeoDashboardVisible(!seoDashboardVisible)}
+      />
+      <SEODashboard isVisible={seoDashboardVisible} />
     </div>
   );
 };

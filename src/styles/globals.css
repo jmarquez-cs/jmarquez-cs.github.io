@@ -349,26 +349,7 @@ html {
   justify-content: center;
 }
 
-.section-title {
-  font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl));
-  font-weight: 800;
-  text-align: center;
-  margin: var(--rhythm-md) 0 var(--rhythm-lg) 0;
-  background: var(--gradient-text);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: none;
-  position: relative;
-  letter-spacing: var(--tracking-tighter);
-  line-height: var(--leading-tight);
-  padding-top: var(--space-8);
-  scroll-margin-top: 100px;
-  font-family: var(--font-primary);
-  text-transform: uppercase;
-  filter: drop-shadow(0 4px 8px var(--shadow-medium));
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+/* Duplicate section-title rule removed - consolidated above */
 
 .section-title:hover {
   transform: translateY(-2px);
@@ -379,8 +360,8 @@ html {
 @media (max-width: 768px) {
   .section-title {
     scroll-margin-top: 80px;
-    margin: var(--rhythm-sm) 0 var(--rhythm-md) 0;
-    padding-top: var(--space-6);
+    margin: var(--space-4) 0 var(--rhythm-sm) 0;
+    padding-top: var(--space-3);
     font-size: clamp(var(--text-2xl), 5.5vw, var(--text-4xl));
   }
 }
@@ -388,8 +369,8 @@ html {
 @media (max-width: 480px) {
   .section-title {
     scroll-margin-top: 70px;
-    margin: var(--rhythm-sm) 0 var(--rhythm-sm) 0;
-    padding-top: var(--space-4);
+    margin: var(--space-3) 0 var(--space-6) 0;
+    padding-top: var(--space-2);
     font-size: clamp(var(--text-xl), 4.5vw, var(--text-3xl));
     letter-spacing: var(--tracking-tight);
   }
@@ -398,8 +379,8 @@ html {
 @media (max-width: 375px) {
   .section-title {
     scroll-margin-top: 60px;
-    margin: var(--space-4) 0 var(--space-8) 0;
-    padding-top: var(--space-3);
+    margin: var(--space-2) 0 var(--space-4) 0;
+    padding-top: var(--space-1);
     font-size: clamp(var(--text-lg), 4vw, var(--text-2xl));
   }
 }
@@ -575,6 +556,42 @@ html {
   }
 }
 
+/* Section title base styling with consistent sizing - Enhanced specificity */
+.section-title,
+h2.section-title,
+.section-title h2 {
+  font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl)) !important;
+  font-family: var(--font-primary) !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: var(--tracking-tighter) !important;
+  line-height: var(--leading-tight) !important;
+  color: var(--text-primary) !important;
+  margin: var(--rhythm-sm) 0 var(--rhythm-md) 0 !important;
+  text-align: center !important;
+  background: var(--gradient-text) !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: none !important;
+  position: relative !important;
+  padding-top: var(--space-4) !important;
+  scroll-margin-top: 100px !important;
+  filter: drop-shadow(0 4px 8px var(--shadow-medium)) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  /* Prevent font scaling during transforms */
+  transform-origin: center !important;
+  backface-visibility: hidden !important;
+  /* Force consistent rendering */
+  will-change: auto !important;
+  contain: layout !important;
+  /* Prevent any dynamic resizing */
+  min-height: auto !important;
+  max-height: none !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+}
+
 /* Enhanced contrast mode support for section titles */
 @media (prefers-contrast: high) {
   .section-title {
@@ -586,6 +603,27 @@ html {
     padding: var(--space-4) var(--space-6);
     border-radius: 8px;
   }
+}
+
+/* Font size protection - prevent dynamic changes */
+.section-title,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit !important;
+}
+
+.section-title {
+  font-size: clamp(var(--text-3xl), 6vw, var(--text-5xl)) !important;
+}
+
+/* Prevent any script-based font resizing */
+* {
+  -webkit-text-size-adjust: none !important;
+  text-size-adjust: none !important;
 }
 
 /* Reduced Motion Support */

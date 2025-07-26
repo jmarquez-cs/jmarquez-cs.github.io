@@ -1,11 +1,18 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { useDeveloperMode } from '../../contexts/DeveloperModeContext';
 import FloatingButton from '../FloatingButton';
 
 const BundleAnalyzerToggle = ({ isVisible, onToggle }) => {
+  const { shouldShowDeveloperFeatures } = useDeveloperMode();
+
   const handleToggle = useCallback(() => {
     onToggle();
   }, [onToggle]);
+
+  if (!shouldShowDeveloperFeatures()) {
+    return null;
+  }
 
   const icon = isVisible ? '❌' : '📦';
   const ariaLabel = `${isVisible ? 'Hide' : 'Show'} Bundle Analyzer`;
@@ -20,7 +27,6 @@ const BundleAnalyzerToggle = ({ isVisible, onToggle }) => {
       ariaLabel={ariaLabel}
       title={title}
       zIndex={9996}
-      developmentOnly={true}
     />
   );
 };

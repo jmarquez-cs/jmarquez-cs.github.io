@@ -295,4 +295,4 @@ export const portfolioSelectors = {
 
 // Export the actual data object with consistent naming
 export const portfolioData = portfolioSchema;
-export default portfolioSchema;
+export default portfolioData;

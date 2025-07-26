@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useTheme } from '../../hooks/useTheme';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { useDeveloperMode } from '../../contexts/DeveloperModeContext';
 import './FloatingButton.css';
 
 const FloatingButton = ({
@@ -16,22 +17,17 @@ const FloatingButton = ({
   title,
   className = '',
   zIndex = 9998,
-  developmentOnly = false,
 }) => {
   const { theme } = useTheme();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(max-width: 1024px) and (min-width: 769px)');
+  const { shouldShowDeveloperFeatures } = useDeveloperMode();
 
   const handleClick = useCallback(() => {
     if (!isPending && !isDisabled && onClick) {
       onClick();
     }
   }, [isPending, isDisabled, onClick]);
-
-  // Hide in production if developmentOnly is true
-  if (developmentOnly && process.env.NODE_ENV !== 'development') {
-    return null;
-  }
 
   const positionClass = `floating-button-${position}`;
 

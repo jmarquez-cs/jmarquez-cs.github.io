@@ -8,7 +8,7 @@ import {
 import { useTheme } from '../../hooks/useTheme';
 import './PerformanceDashboard.css';
 
-const PerformanceDashboard = ({ componentName = 'Dashboard', isVisible = true }) => {
+const PerformanceDashboardComponent = ({ componentName = 'Dashboard', isVisible = true }) => {
   const { theme } = useTheme();
   const performanceData = usePerformanceMonitor(componentName);
   const bundleData = useBundleAnalyzer();
@@ -25,6 +25,8 @@ const PerformanceDashboard = ({ componentName = 'Dashboard', isVisible = true })
       hasRecordedMount.current = true;
     }
   }, [isVisible, performanceData]); // Include performanceData as per ESLint rule
+
+  // Remove development environment check - now controlled by DeveloperModeContext
 
   const formatBytes = useCallback((bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -111,7 +113,7 @@ const PerformanceDashboard = ({ componentName = 'Dashboard', isVisible = true })
     [performanceData, formatBytes, formatMs],
   );
 
-  if (process.env.NODE_ENV !== 'development' || !isVisible) {
+  if (!isVisible) {
     return null;
   }
 
@@ -368,9 +370,10 @@ const PerformanceDashboard = ({ componentName = 'Dashboard', isVisible = true })
   );
 };
 
-PerformanceDashboard.propTypes = {
+PerformanceDashboardComponent.propTypes = {
   componentName: PropTypes.string,
   isVisible: PropTypes.bool,
 };
 
-export default React.memo(PerformanceDashboard);
+export const PerformanceDashboard = React.memo(PerformanceDashboardComponent);
+PerformanceDashboard.displayName = 'PerformanceDashboard';
