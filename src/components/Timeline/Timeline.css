@@ -7,7 +7,9 @@
   position: relative;
   /* Prevent any scrolling */
   overflow: hidden;
-  touch-action: none;
+  touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal */
+  overscroll-behavior-x: none;
+  -webkit-overflow-scrolling: auto; /* Disable iOS momentum scrolling */
 }
 
 .timeline-container {
@@ -22,7 +24,9 @@
   /* Prevent all scrolling */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  touch-action: none;
+  touch-action: pan-y; /* Allow vertical scrolling but prevent horizontal */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: auto;
   /* Fade edges for infinite appearance using theme-aware colors */
   mask: linear-gradient(
     to right,
@@ -52,19 +56,28 @@
 .timeline-scroll {
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 80px;
   position: relative;
   gap: 2rem;
   width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  scroll-behavior: smooth;
-  scroll-snap-type: x mandatory;
   cursor: grab;
   user-select: none;
-  padding: 0 50%;
+  /* Center the visible timeline items around the center indicator */
+  padding: 0;
+  /* Ensure smooth dragging performance */
+  will-change: transform;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  /* GPU acceleration optimizations */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .timeline-scroll::-webkit-scrollbar {
@@ -80,6 +93,31 @@
   scroll-behavior: smooth;
 }
 
+.timeline-scroll.rail-active {
+  /* Additional rail-specific styles */
+  overflow-x: visible; /* Override for rail mode */
+  /* Enhanced visual feedback during rail mode */
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--bg-secondary) 20%,
+    var(--bg-secondary) 80%,
+    transparent 100%
+  );
+  border-radius: 8px;
+  box-shadow: inset 0 2px 8px var(--shadow-soft);
+}
+
+.timeline-scroll.snapping .timeline-section {
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.timeline-scroll.snapping .timeline-center-indicator {
+  transform: translate(-50%, -50%) scale(1.1);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 12px var(--shadow-medium);
+}
+
 .timeline-scroll::before {
   content: '';
   position: absolute;
@@ -93,8 +131,36 @@
   opacity: 0.6;
 }
 
+.timeline-items-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.timeline-items-container.rail-mode {
+  /* Continuous timeline specific layout */
+  width: 100%;
+  justify-content: center;
+  overflow: hidden; /* Prevent overflow that could trigger horizontal scroll */
+  position: relative;
+  /* Enhanced rail visualization */
+  padding: 0; /* Remove viewport padding that causes overflow */
+  transform-style: preserve-3d;
+  /* Ensure proper centering on mobile */
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  /* Prevent any horizontal scrolling */
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
 .timeline-center-indicator {
-  position: fixed;
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -106,6 +172,69 @@
   pointer-events: none;
   opacity: 0.8;
   box-shadow: 0 2px 8px var(--shadow-medium);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Ensure center indicator stays centered on all screen sizes */
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.timeline-scroll.dragging .timeline-center-indicator {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.15);
+  box-shadow:
+    0 6px 20px var(--text-accent-alpha, rgba(255, 107, 107, 0.4)),
+    0 0 30px var(--text-accent-alpha, rgba(255, 107, 107, 0.2));
+  background: linear-gradient(0deg, var(--text-accent), rgba(255, 255, 255, 0.3));
+}
+
+.timeline-center-indicator::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  background: radial-gradient(circle, var(--text-accent) 0%, transparent 70%);
+  opacity: 0.1;
+  border-radius: 50%;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.timeline-center-indicator::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: -12px;
+  right: -12px;
+  bottom: -12px;
+  border: 2px solid var(--text-accent);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.timeline-scroll.dragging .timeline-center-indicator::after {
+  opacity: 0.6;
+  transform: scale(1.2);
+  animation: snapPreview 1.5s ease-in-out infinite;
+}
+
+@keyframes snapPreview {
+  0%,
+  100% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.3;
+  }
+}
+
+.timeline-scroll.snapping .timeline-center-indicator::before {
+  opacity: 0.3;
+  transform: scale(1.5);
 }
 
 .timeline-section {
@@ -118,16 +247,25 @@
   align-items: center;
   justify-content: center;
   min-width: 120px;
+  width: 120px;
   position: relative;
   z-index: 52;
   flex-shrink: 0;
   padding: 0.5rem;
   user-select: none;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
   opacity: 0.3;
-  scroll-snap-align: center;
   transform-origin: center;
+  /* GPU acceleration for smooth animations */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Remove button-specific styles */
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .timeline-section.adjacent {
@@ -145,10 +283,21 @@
   opacity: 0.8;
 }
 
+.timeline-section:focus {
+  outline: 2px solid var(--text-accent);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+.timeline-section:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .timeline-section.center.active {
   transform: translateY(-8px) scale(1.2);
   opacity: 1;
   z-index: 60;
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .timeline-section.center.active .timeline-dot {
@@ -156,7 +305,9 @@
   transform: scale(1.5);
   box-shadow: 0 8px 20px var(--shadow-medium);
   border-color: var(--bg-primary);
-  animation: pulse 2s infinite;
+  animation:
+    pulse 2s infinite,
+    snapIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .timeline-section.center.active .timeline-year {
@@ -165,6 +316,7 @@
   font-weight: 700;
   font-size: 1rem;
   text-shadow: 0 2px 4px var(--shadow-soft);
+  animation: yearSnapIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 @keyframes pulse {
@@ -174,6 +326,32 @@
   }
   50% {
     transform: scale(1.6);
+  }
+}
+
+@keyframes snapIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  60% {
+    transform: scale(1.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+@keyframes yearSnapIn {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
@@ -232,34 +410,324 @@
   font-size: 1rem;
 }
 
-/* Touch zones for left/right navigation */
-.timeline-nav-zone {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
+/* Rail mode specific visual hierarchy extensions with GPU acceleration */
+.timeline-scroll.rail-active .timeline-section {
+  /* Enhanced rail mode transitions with GPU optimization */
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+  /* GPU acceleration optimizations */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Hardware acceleration hints */
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.timeline-scroll.rail-active .timeline-section.rail-optimized {
+  /* Additional optimizations for virtual scrolled items */
+  contain: layout style paint;
+  content-visibility: auto;
+  /* Aggressive GPU acceleration for smooth rail movement */
+  will-change: transform;
+  transform: translateZ(0);
+  isolation: isolate;
+  /* Performance hints for rendering engine */
+  pointer-events: auto;
+  user-select: none;
+}
+
+.timeline-scroll.rail-active .timeline-section.center.active {
+  /* Enhanced center item in rail mode */
+  transform: translateY(-12px) scale(1.3);
+  opacity: 1;
+  z-index: 65;
+  filter: drop-shadow(0 8px 16px var(--shadow-medium));
+}
+
+.timeline-scroll.rail-active .timeline-section.center.active .timeline-dot {
+  /* Enhanced center dot in rail mode */
+  background: var(--text-accent);
+  transform: scale(1.8);
+  box-shadow:
+    0 0 20px var(--text-accent-alpha, rgba(255, 107, 107, 0.6)),
+    0 8px 24px var(--shadow-medium);
+  border: 3px solid var(--bg-primary);
+  animation: railPulse 1.5s ease-in-out infinite;
+}
+
+.timeline-scroll.rail-active .timeline-section.center.active .timeline-year {
+  /* Enhanced center year in rail mode */
+  color: var(--text-accent);
+  font-weight: 800;
+  font-size: 1.1rem;
+  text-shadow: 0 2px 8px var(--shadow-medium);
+  animation: railYearGlow 2s ease-in-out infinite alternate;
+}
+
+.timeline-scroll.rail-active .timeline-section.adjacent {
+  /* Enhanced adjacent items in rail mode */
+  opacity: 0.75;
+  transform: translateY(-4px) scale(1);
+  filter: drop-shadow(0 4px 8px var(--shadow-soft));
+}
+
+.timeline-scroll.rail-active .timeline-section.adjacent .timeline-dot {
+  /* Enhanced adjacent dots in rail mode */
+  background: var(--text-secondary);
+  transform: scale(1.3);
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 4px 12px var(--shadow-soft);
+}
+
+.timeline-scroll.rail-active .timeline-section.adjacent .timeline-year {
+  /* Enhanced adjacent years in rail mode */
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.timeline-scroll.rail-active .timeline-section.distant {
+  /* Enhanced distant items in rail mode */
+  opacity: 0.4;
+  transform: translateY(0px) scale(0.85);
+  filter: grayscale(0.3);
+}
+
+.timeline-scroll.rail-active .timeline-section.distant .timeline-dot {
+  /* Enhanced distant dots in rail mode */
+  background: var(--text-muted);
+  transform: scale(1);
+  border: 1px solid var(--bg-secondary);
+  opacity: 0.7;
+}
+
+.timeline-scroll.rail-active .timeline-section.distant .timeline-year {
+  /* Enhanced distant years in rail mode */
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+/* Rail mode center indicator enhancements */
+.timeline-scroll.rail-active .timeline-center-indicator {
+  /* Enhanced center indicator for rail mode */
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.2);
+  background: linear-gradient(
+    0deg,
+    var(--text-accent),
+    rgba(255, 255, 255, 0.4),
+    var(--text-accent)
+  );
+  box-shadow:
+    0 0 30px var(--text-accent-alpha, rgba(255, 107, 107, 0.5)),
+    0 6px 20px var(--shadow-medium);
+  animation: railIndicatorPulse 2s ease-in-out infinite;
+}
+
+.timeline-scroll.rail-active .timeline-center-indicator::before {
+  /* Enhanced center indicator glow in rail mode */
+  opacity: 0.4;
+  transform: scale(2);
+  background: radial-gradient(
+    circle,
+    var(--text-accent) 0%,
+    var(--text-accent-alpha, rgba(255, 107, 107, 0.3)) 50%,
+    transparent 70%
+  );
+}
+
+.timeline-scroll.rail-active .timeline-center-indicator::after {
+  /* Enhanced center indicator ring in rail mode */
+  opacity: 0.8;
+  transform: scale(1.5);
+  border: 2px solid var(--text-accent);
+  animation: railIndicatorRing 3s linear infinite;
+}
+
+/* Rail-to-viewport transition animations */
+.timeline-scroll.rail-transitioning {
+  /* Smooth transition when leaving rail mode */
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.timeline-scroll.rail-transitioning .timeline-section {
+  /* Smooth item transitions when leaving rail mode */
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.timeline-scroll.rail-transitioning .timeline-center-indicator {
+  /* Smooth indicator transition when leaving rail mode */
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Rail mode keyframe animations with GPU acceleration */
+@keyframes railPulse {
+  0%,
+  100% {
+    transform: scale3d(1.8, 1.8, 1) translateZ(0);
+    box-shadow:
+      0 0 20px var(--text-accent-alpha, rgba(255, 107, 107, 0.6)),
+      0 8px 24px var(--shadow-medium);
+  }
+  50% {
+    transform: scale3d(1.9, 1.9, 1) translateZ(0);
+    box-shadow:
+      0 0 30px var(--text-accent-alpha, rgba(255, 107, 107, 0.8)),
+      0 12px 32px var(--shadow-medium);
+  }
+}
+
+/* Performance boundary fallback styles */
+.timeline-scroll.performance-degraded {
+  /* Simplified styles when performance drops */
+  animation: none;
+  transition: none;
+}
+
+.timeline-scroll.performance-degraded .timeline-section {
+  /* Disable animations for performance recovery */
+  animation: none;
+  transition: opacity 0.2s ease;
+  will-change: auto;
+  transform: none;
+}
+
+.timeline-scroll.performance-degraded .timeline-section.rail-optimized {
+  /* Minimal styles for degraded performance mode */
+  contain: none;
+  content-visibility: visible;
+  transform: translateX(var(--rail-position, 0)) translateZ(0);
+}
+
+/* Virtual scrolling optimization hints */
+.timeline-items-container.rail-mode {
+  /* Enhanced performance for virtual scrolling */
+  contain: layout style paint size;
+  overflow: visible;
+  /* GPU layer promotion */
+  will-change: contents;
+  transform: translateZ(0);
+  /* Rendering optimization */
+  isolation: isolate;
+}
+
+@keyframes railYearGlow {
+  0% {
+    text-shadow: 0 2px 8px var(--shadow-medium);
+    color: var(--text-accent);
+  }
+  100% {
+    text-shadow:
+      0 4px 16px var(--text-accent-alpha, rgba(255, 107, 107, 0.6)),
+      0 2px 8px var(--shadow-medium);
+    color: var(--text-accent);
+  }
+}
+
+@keyframes railIndicatorPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.25);
+    opacity: 0.9;
+  }
+}
+
+@keyframes railIndicatorRing {
+  0% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.8);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+}
+
+/* Dragging optimizations */
+.timeline-scroll.dragging * {
+  pointer-events: none;
+  user-select: none;
+}
+
+.timeline-scroll.dragging .timeline-section {
+  transform-origin: center;
+  will-change: transform;
+}
+
+/* Drag tooltip */
+.timeline-drag-tooltip {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 2px solid var(--text-accent);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
   z-index: 70;
-  cursor: pointer;
-  background: transparent;
-  transition: background-color 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 8px 24px var(--shadow-medium);
+  backdrop-filter: blur(10px);
+  animation: tooltipFadeIn 0.2s ease-out;
 }
 
-.timeline-nav-zone.left {
-  left: 0;
-  cursor: w-resize;
+.timeline-drag-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: var(--text-accent);
 }
 
-.timeline-nav-zone.right {
-  right: 0;
-  cursor: e-resize;
+.tooltip-year {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-accent);
+  text-align: center;
+  margin-bottom: 0.25rem;
 }
 
-.timeline-nav-zone:hover {
-  background: var(--shadow-soft);
+.tooltip-title {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  text-align: center;
+  margin-bottom: 0.125rem;
+  font-weight: 500;
+}
+
+.tooltip-type {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@keyframes tooltipFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* Momentum scrolling improvements */
@@ -309,6 +777,11 @@
     scroll-snap-type: x mandatory;
   }
 
+  .timeline-scroll.rail-active {
+    padding: 0; /* Remove viewport padding in rail mode for proper centering */
+    justify-content: center;
+  }
+
   .timeline-section {
     min-width: 80px;
     padding: 0.25rem;
@@ -330,6 +803,58 @@
     min-height: 44px;
     min-width: 88px;
   }
+
+  /* Improve dragging on mobile */
+  .timeline-scroll {
+    touch-action: pan-x;
+  }
+
+  /* Rail mode mobile optimizations */
+  .timeline-scroll.rail-active .timeline-section.center.active {
+    transform: translateY(-8px) scale(1.2);
+    filter: drop-shadow(0 6px 12px var(--shadow-medium));
+  }
+
+  .timeline-scroll.rail-active .timeline-section.center.active .timeline-dot {
+    transform: scale(1.6);
+    box-shadow:
+      0 0 16px var(--text-accent-alpha, rgba(255, 107, 107, 0.5)),
+      0 6px 18px var(--shadow-medium);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.center.active .timeline-year {
+    font-size: 1rem;
+    font-weight: 700;
+    text-shadow: 0 2px 6px var(--shadow-medium);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.adjacent {
+    transform: translateY(-2px) scale(0.95);
+    opacity: 0.75;
+  }
+
+  .timeline-scroll.rail-active .timeline-section.adjacent .timeline-dot {
+    transform: scale(1.25);
+    background: var(--text-secondary);
+    box-shadow: 0 3px 8px var(--shadow-soft);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.distant {
+    transform: translateY(0px) scale(0.8);
+    opacity: 0.4;
+  }
+
+  .timeline-scroll.rail-active .timeline-section.distant .timeline-dot {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+
+  .timeline-scroll.rail-active .timeline-center-indicator {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow:
+      0 0 20px var(--text-accent-alpha, rgba(255, 107, 107, 0.4)),
+      0 4px 12px var(--shadow-medium);
+  }
 }
 
 /* Small mobile devices */
@@ -343,8 +868,59 @@
     padding: 0 35vw;
   }
 
+  .timeline-scroll.rail-active {
+    padding: 0; /* Remove viewport padding in rail mode for proper centering */
+    justify-content: center;
+  }
+
   .timeline-section {
     min-width: 60px;
+  }
+
+  /* Rail mode small mobile optimizations */
+  .timeline-scroll.rail-active .timeline-section.center.active {
+    transform: translateY(-6px) scale(1.15);
+    filter: drop-shadow(0 4px 8px var(--shadow-medium));
+  }
+
+  .timeline-scroll.rail-active .timeline-section.center.active .timeline-dot {
+    transform: scale(1.5);
+    box-shadow:
+      0 0 12px var(--text-accent-alpha, rgba(255, 107, 107, 0.4)),
+      0 4px 12px var(--shadow-medium);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.center.active .timeline-year {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-shadow: 0 1px 4px var(--shadow-medium);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.adjacent {
+    opacity: 0.7;
+    transform: translateY(-1px) scale(0.9);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.adjacent .timeline-dot {
+    transform: scale(1.2);
+    background: var(--text-secondary);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.distant {
+    opacity: 0.35;
+    transform: translateY(0px) scale(0.75);
+  }
+
+  .timeline-scroll.rail-active .timeline-section.distant .timeline-dot {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+
+  .timeline-scroll.rail-active .timeline-center-indicator {
+    transform: translate(-50%, -50%) scale(1.05);
+    box-shadow:
+      0 0 15px var(--text-accent-alpha, rgba(255, 107, 107, 0.3)),
+      0 3px 8px var(--shadow-medium);
   }
 }
 
@@ -352,26 +928,32 @@
 @media (hover: none) and (pointer: coarse) {
   .timeline-container {
     overflow: hidden;
-    touch-action: pan-x;
+    touch-action: pan-y; /* Only allow vertical pan, prevent horizontal */
+    overscroll-behavior: none;
   }
 
   .timeline-scroll {
-    touch-action: pan-x;
-    -webkit-overflow-scrolling: touch;
+    touch-action: none; /* Completely disable browser touch handling for custom drag */
+    -webkit-overflow-scrolling: auto; /* Disable iOS momentum scrolling */
+    overscroll-behavior: none;
+    /* Prevent any browser scrolling */
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    max-width: 100vw;
   }
 
-  .timeline-nav-zone {
-    /* Make touch zones more prominent on mobile */
-    width: 45%;
-    touch-action: manipulation;
+  .timeline-items-container {
+    overflow: hidden;
+    max-width: 100vw;
+    position: relative;
   }
 
-  .timeline-nav-zone.left {
-    left: 5%;
-  }
-
-  .timeline-nav-zone.right {
-    right: 5%;
+  .timeline-items-container.rail-mode {
+    overflow: hidden; /* Crucial: prevent horizontal scroll detection */
+    width: 100%;
+    max-width: 100vw;
+    padding: 0; /* Remove padding that causes overflow */
   }
 
   /* Improve haptic feedback visual cues */
@@ -413,8 +995,9 @@
     text-shadow: 1px 1px 2px var(--shadow);
   }
 
-  .timeline-nav-zone:hover {
-    background: var(--shadow-medium);
+  /* Better dragging feedback */
+  .timeline-scroll.dragging {
+    cursor: grabbing;
   }
 }
 
@@ -428,5 +1011,25 @@
   .timeline-dot,
   .nav-dot {
     transition: none;
+  }
+
+  /* Disable rail mode animations for reduced motion */
+  .timeline-scroll.rail-active .timeline-section,
+  .timeline-scroll.rail-active .timeline-dot,
+  .timeline-scroll.rail-active .timeline-center-indicator {
+    animation: none;
+    transition: none;
+  }
+
+  .timeline-scroll.rail-active .timeline-section.center.active .timeline-dot {
+    animation: none;
+  }
+
+  .timeline-scroll.rail-active .timeline-section.center.active .timeline-year {
+    animation: none;
+  }
+
+  .timeline-scroll.rail-active .timeline-center-indicator::after {
+    animation: none;
   }
 }
